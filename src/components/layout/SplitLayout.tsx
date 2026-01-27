@@ -1,9 +1,8 @@
-import ControlPanel from "../invoice/ControlPanel";
-import LiveCanvas from "../invoice/LiveCanvas";
+import React, { ReactNode } from "react";
 
 interface SplitLayoutProps {
-  controlPanelContent: React.ReactNode;
-  liveCanvasContent: React.ReactNode;
+  controlPanelContent: ReactNode;
+  liveCanvasContent: ReactNode;
 }
 
 export default function SplitLayout({
@@ -11,9 +10,14 @@ export default function SplitLayout({
   liveCanvasContent,
 }: SplitLayoutProps) {
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full bg-background android-keyboard-adjust print:h-auto print:overflow-visible">
-      <ControlPanel>{controlPanelContent}</ControlPanel>
-      <LiveCanvas>{liveCanvasContent}</LiveCanvas>
+    <div className="flex h-screen w-full bg-background overflow-hidden flex-col lg:flex-row print:block">
+      {/* Left Panel - Control Panel Content */}
+      {controlPanelContent}
+
+      {/* Right Panel - Live Canvas Content */}
+      <main className="flex-1 bg-slate-100/50 relative overflow-y-auto overflow-x-hidden flex flex-col print:overflow-visible print:h-auto print:bg-white">
+        {liveCanvasContent}
+      </main>
     </div>
   );
 }
