@@ -58,24 +58,17 @@ export default function InvoicePage() {
     document.title = data.number ? `Factura ${data.number}` : "Nueva Factura";
   }, [data.number]);
 
-  const handlePrint = useReactToPrint({
+  const handleExportPDF = useReactToPrint({
     contentRef: canvasRef,
     documentTitle: data.number ? `Factura-${data.number}` : "Factura",
     onPrintError: (errorLocation, error) => {
-      console.warn("Print Warning (non-critical):", error);
+      console.warn("Print logic warning", error);
       setIsExporting(false);
     },
     onAfterPrint: () => {
       setIsExporting(false);
     },
   });
-
-  const handleExportPDF = () => {
-    setIsExporting(true);
-    if (handlePrint) {
-      handlePrint();
-    }
-  };
 
   const handleSaveInvoice = async () => {
     if (!data.client.name) {

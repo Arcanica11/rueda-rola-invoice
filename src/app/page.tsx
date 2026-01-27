@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Link as LinkIcon, Lock, Pencil, Printer, Plus } from "lucide-react";
+import { Save, Pencil, Printer, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -10,118 +10,108 @@ export default function LandingPage() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.3,
+        staggerChildren: 0.2,
       },
     },
   };
 
   const item = {
-    hidden: { opacity: 0, y: 50 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 50 } },
+    hidden: { opacity: 0, scale: 0.9 },
+    show: { opacity: 1, scale: 1, transition: { type: "spring", bounce: 0.4 } },
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white to-purple-50 flex flex-col items-center justify-center p-6 sm:p-12 font-sans text-slate-800">
+    <main className="min-h-screen bg-linear-to-br from-slate-50 to-purple-50 flex flex-col items-center justify-center p-6 sm:p-12 font-sans text-slate-800">
       {/* Hero Section */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-16"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-12 sm:mb-20"
       >
-        <h1 className="text-5xl sm:text-7xl font-bold tracking-tight text-primary mb-4 text-purple-700">
-          Rueda Rola Invoice
+        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-4 drop-shadow-sm">
+          Tu Facturador Mágico 🪄
         </h1>
-        <p className="text-2xl sm:text-3xl text-slate-600 font-light">
-          Facturación sin dolor de cabeza
+        <p className="text-xl sm:text-2xl text-slate-500 font-medium">
+          Haz facturas tan rápido que parecerá truco de magia.
         </p>
       </motion.div>
 
-      {/* El Manual (Infografía Interactiva) */}
+      {/* Grid de Pasos (2x2) */}
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl w-full mb-16"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mb-16"
       >
-        {/* Step 1 */}
+        {/* Paso 1: Llenar */}
         <motion.div
           variants={item}
-          className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow border-2 border-purple-100 flex flex-col items-center text-center transform hover:-translate-y-2 duration-300"
+          className="bg-white p-8 rounded-3xl shadow-lg border border-purple-50 hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
         >
-          <div className="bg-purple-100 p-4 rounded-full mb-6">
-            <Pencil className="w-10 h-10 text-purple-600" />
+          <div className="bg-purple-100 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <Pencil className="w-8 h-8 text-purple-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3 text-purple-900">
-            1. ¿A quién le cobramos?
-          </h3>
-          <p className="text-slate-600">
-            Escribe el cliente y qué vendiste. ¡Así de fácil!
+          <h3 className="text-2xl font-bold mb-3 text-slate-800">Llenar</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Escribe quién te paga y qué hiciste.
           </p>
         </motion.div>
 
-        {/* Step 2 */}
+        {/* Paso 2: Guardar */}
         <motion.div
           variants={item}
-          className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow border-2 border-purple-100 flex flex-col items-center text-center transform hover:-translate-y-2 duration-300"
+          className="bg-white p-8 rounded-3xl shadow-lg border border-purple-50 hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
         >
-          <div className="bg-blue-100 p-4 rounded-full mb-6">
-            <Lock className="w-10 h-10 text-blue-600" />
+          <div className="bg-blue-100 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <Save className="w-8 h-8 text-blue-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3 text-blue-900">
-            2. ¡Congélalo!
-          </h3>
-          <p className="text-slate-600">
-            Dale al botón <span className="font-bold">Guardar</span> para
-            asegurar que nadie mueva los números.
+          <h3 className="text-2xl font-bold mb-3 text-slate-800">Guardar</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Dale al botón Guardar para congelar todo.
           </p>
         </motion.div>
 
-        {/* Step 3 */}
+        {/* Paso 3: Imprimir */}
         <motion.div
           variants={item}
-          className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow border-2 border-purple-100 flex flex-col items-center text-center transform hover:-translate-y-2 duration-300"
+          className="bg-white p-8 rounded-3xl shadow-lg border border-purple-50 hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
         >
-          <div className="bg-green-100 p-4 rounded-full mb-6">
-            <Printer className="w-10 h-10 text-green-600" />
+          <div className="bg-green-100 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <Printer className="w-8 h-8 text-green-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3 text-green-900">3. La Magia</h3>
-          <p className="text-slate-600">
-            El botón <span className="font-bold">Exportar PDF</span> te da tu
-            hoja lista para enviar.
+          <h3 className="text-2xl font-bold mb-3 text-slate-800">Imprimir</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Botón 'Exportar PDF' = Tu hoja lista.
           </p>
         </motion.div>
 
-        {/* Step 4 */}
+        {/* Paso 4: Repetir */}
         <motion.div
           variants={item}
-          className="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow border-2 border-purple-100 flex flex-col items-center text-center transform hover:-translate-y-2 duration-300"
+          className="bg-white p-8 rounded-3xl shadow-lg border border-purple-50 hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center group"
         >
-          <div className="bg-orange-100 p-4 rounded-full mb-6">
-            <Plus className="w-10 h-10 text-orange-600" />
+          <div className="bg-orange-100 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <Plus className="w-8 h-8 text-orange-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3 text-orange-900">
-            4. ¿Otro cliente?
-          </h3>
-          <p className="text-slate-600">
-            Dale a <span className="font-bold">Nueva Factura</span> y empezamos
-            de cero.
+          <h3 className="text-2xl font-bold mb-3 text-slate-800">Repetir</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            ¿Nueva venta? Botón 'Nueva Factura'.
           </p>
         </motion.div>
       </motion.div>
 
-      {/* CTA Button */}
+      {/* Botón Central Gigante */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.5 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.8, duration: 0.4 }}
       >
         <Link
           href="/invoice"
-          className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-purple-600 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 hover:bg-purple-700 hover:scale-105 shadow-lg hover:shadow-purple-500/50"
+          className="relative inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-white transition-all duration-200 bg-purple-600 rounded-full focus:outline-none focus:ring-4 focus:ring-purple-200 hover:bg-purple-700 hover:shadow-2xl hover:-translate-y-1 active:scale-95"
         >
-          <span>🚀 COMENZAR AHORA</span>
-          <div className="absolute inset-0 rounded-full ring-2 ring-white/20 group-hover:ring-white/40 transition-all" />
+          <span className="mr-3">🚀</span> ENTRAR A FACTURAR
         </Link>
       </motion.div>
     </main>
