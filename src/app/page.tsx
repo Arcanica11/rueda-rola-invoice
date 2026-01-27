@@ -17,7 +17,11 @@ export default function LandingPage() {
 
   const item = {
     hidden: { opacity: 0, scale: 0.9 },
-    show: { opacity: 1, scale: 1, transition: { type: "spring", bounce: 0.4 } },
+    show: {
+      opacity: 1,
+      scale: 1,
+      transition: { type: "spring", bounce: 0.4 } as const,
+    },
   };
 
   return (
