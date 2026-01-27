@@ -39,29 +39,31 @@ export default function LiveCanvas({
   return (
     <div
       ref={containerRef}
-      className="flex w-full lg:w-[60%] h-full bg-slate-50/50 justify-center relative overflow-y-auto p-8"
+      className="flex w-full lg:w-[60%] h-full bg-slate-50/50 relative overflow-y-auto"
     >
       {/* Background decoration */}
-      <div className="absolute inset-0 grid grid-cols-[20] opacity-[0.03] pointer-events-none">
+      <div className="absolute inset-0 grid grid-cols-[20] opacity-[0.03] pointer-events-none print:hidden">
         {/* Simple grid lines could go here */}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: scale, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-[210mm] h-[297mm] bg-white shadow-2xl rounded-sm relative box-border overflow-hidden ring-1 ring-black/5 shrink-0 origin-top my-8 p-10"
-        style={
-          {
-            // We override the motion scale with our calculated scale if we needed strict control,
-            // but mixing motion scale and our standard scale might be tricky.
-            // Actually, let's use the animate prop for scale directly.
+      <div className="min-h-full w-full flex flex-col items-center justify-center py-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: scale, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-[210mm] min-h-[297mm] h-auto overflow-visible bg-white shadow-2xl rounded-sm relative box-border ring-1 ring-black/5 shrink-0 origin-top mb-10 p-10"
+          style={
+            {
+              // We override the motion scale with our calculated scale if we needed strict control,
+              // but mixing motion scale and our standard scale might be tricky.
+              // Actually, let's use the animate prop for scale directly.
+            }
           }
-        }
-        id="invoice-a4-canvas"
-      >
-        {children}
-      </motion.div>
+          id="invoice-preview-container"
+        >
+          {children}
+        </motion.div>
+      </div>
     </div>
   );
 }

@@ -132,3 +132,61 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+@media print {
+  /* Configuración de página limpia */
+  @page {
+    margin: 20mm;
+    size: auto;
+  }
+
+  /* Ocultar elementos de UI (Formulario, Botones, Barras) */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Reiniciar alturas para permitir paginación */
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white;
+  }
+
+  /* Mostrar e imponer flujo normal a la factura */
+  #invoice-preview-container,
+  #invoice-preview-container * {
+    visibility: visible;
+  }
+
+  #invoice-preview-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: white;
+
+    /* CLAVE: Permitir que rompa páginas */
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Evitar que items se partan a la mitad */
+  tr,
+  .item-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Mantener el footer fijo si existe, o dejar fluyendo si se prefiere */
+  .print-footer-fixed {
+    /* Use fixed if we want it on every page bottom, requires fixed height reservation */
+    /* But user requested relative/flowing layout mainly. 
+        The previous task setup a fixed footer. 
+        Let's ensure it's visible. */
+    visibility: visible;
+  }
+}

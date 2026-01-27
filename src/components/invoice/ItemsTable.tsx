@@ -18,63 +18,69 @@ export default function ItemsTable({ items }: { items: InvoiceItem[] }) {
 
   return (
     <div className="mb-8 relative z-10 w-full">
-      <div className="w-full">
+      <table className="w-full border-collapse">
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 py-3 border-b border-slate-200 mb-2">
-          <div className="col-span-6 text-xs font-bold text-slate-500 uppercase tracking-widest pl-2">
-            Descripción
-          </div>
-          <div className="col-span-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest">
-            Cant.
-          </div>
-          <div className="col-span-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest">
-            Precio
-          </div>
-          <div className="col-span-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest pr-2">
-            Total
-          </div>
-        </div>
+        <thead>
+          <tr className="border-b border-slate-200">
+            <th className="py-2 pl-2 text-left text-xs font-bold text-slate-500 uppercase tracking-widest w-1/2">
+              Descripción
+            </th>
+            <th className="py-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest w-[16%]">
+              Cant.
+            </th>
+            <th className="py-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest w-[16%]">
+              Precio
+            </th>
+            <th className="py-2 pr-2 text-right text-xs font-bold text-slate-500 uppercase tracking-widest w-[16%]">
+              Total
+            </th>
+          </tr>
+        </thead>
 
         {/* Table Body */}
-        <div className="min-h-[200px]">
-          {" "}
-          {/* Min height to maintain structure */}
+        <tbody>
           <AnimatePresence initial={false}>
             {items.map((item) => (
-              <motion.div
+              <motion.tr
                 key={item.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
+                exit={{ opacity: 0, x: 20, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-12 gap-4 py-4 border-b border-slate-100 group"
+                className="border-b border-slate-100 group item-row"
+                layout="position"
               >
-                <div className="col-span-6 pl-2 font-medium text-slate-700 group-hover:text-primary transition-colors">
+                <td className="py-2 pl-2 font-medium text-slate-700 text-sm group-hover:text-primary transition-colors align-top">
                   {item.description || (
                     <span className="text-slate-300 italic">
                       Nueva línea...
                     </span>
                   )}
-                </div>
-                <div className="col-span-2 text-right text-slate-600 font-mono text-sm">
+                </td>
+                <td className="py-2 text-right text-slate-600 font-mono text-sm align-top">
                   {item.quantity}
-                </div>
-                <div className="col-span-2 text-right text-slate-600 font-mono text-sm">
+                </td>
+                <td className="py-2 text-right text-slate-600 font-mono text-sm align-top">
                   {formatCurrency(item.price)}
-                </div>
-                <div className="col-span-2 text-right font-bold text-slate-800 font-mono text-sm pr-2 whitespace-nowrap">
+                </td>
+                <td className="py-2 pr-2 text-right font-bold text-slate-800 font-mono text-sm whitespace-nowrap align-top">
                   {formatCurrency(item.quantity * item.price)}
-                </div>
-              </motion.div>
+                </td>
+              </motion.tr>
             ))}
           </AnimatePresence>
           {items.length === 0 && (
-            <div className="py-12 text-center text-slate-300 italic font-light">
-              No hay items en esta factura
-            </div>
+            <tr>
+              <td
+                colSpan={4}
+                className="py-12 text-center text-slate-300 italic font-light"
+              >
+                No hay items en esta factura
+              </td>
+            </tr>
           )}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }

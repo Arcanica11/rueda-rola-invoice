@@ -15,6 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface InvoiceFormProps {
   data: InvoiceData;
+  isLocked?: boolean;
   actions: {
     setClient: (field: keyof InvoiceData["client"], value: string) => void;
     updateItem: (
@@ -27,7 +28,11 @@ interface InvoiceFormProps {
   };
 }
 
-export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
+export default function InvoiceForm({
+  data,
+  actions,
+  isLocked = false,
+}: InvoiceFormProps) {
   return (
     <div className="space-y-10 pb-20">
       {/* Client Section */}
@@ -45,6 +50,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
               value={data.client.name}
               onChange={(e) => actions.setClient("name", e.target.value)}
               placeholder="Ej. Tacos Michoacán LLC"
+              disabled={isLocked}
             />
           </div>
           <div className="grid gap-2">
@@ -53,6 +59,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
               value={data.client.address}
               onChange={(e) => actions.setClient("address", e.target.value)}
               placeholder="Calle Principal 123, Ciudad..."
+              disabled={isLocked}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -62,6 +69,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
                 value={data.client.email}
                 onChange={(e) => actions.setClient("email", e.target.value)}
                 placeholder="cliente@ejemplo.com"
+                disabled={isLocked}
               />
             </div>
             <div className="grid gap-2">
@@ -70,6 +78,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
                 value={data.client.taxId}
                 onChange={(e) => actions.setClient("taxId", e.target.value)}
                 placeholder="XAXX010101000"
+                disabled={isLocked}
               />
             </div>
           </div>
@@ -90,6 +99,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
             onClick={actions.addItem}
             variant="secondary"
             className="h-7 text-xs"
+            disabled={isLocked}
           >
             <Plus className="w-3 h-3 mr-1" /> Agregar Item
           </Button>
@@ -116,6 +126,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
                     }
                     placeholder="Descripción del servicio"
                     className="h-8 text-sm"
+                    disabled={isLocked}
                   />
                 </div>
                 <div className="col-span-2 space-y-1">
@@ -133,6 +144,7 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
                       )
                     }
                     className="h-8 text-sm text-right font-mono"
+                    disabled={isLocked}
                   />
                 </div>
                 <div className="col-span-3 space-y-1 relative">
@@ -151,12 +163,14 @@ export default function InvoiceForm({ data, actions }: InvoiceFormProps) {
                         )
                       }
                       className="h-8 text-sm text-right font-mono"
+                      disabled={isLocked}
                     />
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity absolute -right-10 top-6"
                       onClick={() => actions.removeItem(item.id)}
+                      disabled={isLocked}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

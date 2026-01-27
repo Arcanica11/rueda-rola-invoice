@@ -11,7 +11,7 @@ export default function SplitLayout({
   liveCanvasContent,
 }: SplitLayoutProps) {
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full bg-background android-keyboard-adjust">
+    <div className="flex flex-col lg:flex-row h-screen w-full bg-background android-keyboard-adjust print:h-auto print:overflow-visible">
       <ControlPanel>{controlPanelContent}</ControlPanel>
       <LiveCanvas>{liveCanvasContent}</LiveCanvas>
     </div>
