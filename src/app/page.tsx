@@ -31,7 +31,9 @@ export default function InvoicePage() {
       // Find the actual element inside LiveCanvas that we want to capture
       // The id 'invoice-a4-canvas' is on the motion div in LiveCanvas
       const element = document.getElementById("invoice-a4-canvas");
-      if (!element) return;
+      if (!element) {
+        throw new Error("Elemento de factura no encontrado");
+      }
 
       const canvas = await html2canvas(element, {
         scale: 2, // High DPI
@@ -54,6 +56,11 @@ export default function InvoicePage() {
       pdf.save(`Invoice-${data.number}.pdf`);
     } catch (error) {
       console.error("PDF Export failed", error);
+      alert(
+        "Error al generar PDF: " +
+          (error as Error).message +
+          ". Intenta recargar la página.",
+      );
     } finally {
       setIsExporting(false);
     }

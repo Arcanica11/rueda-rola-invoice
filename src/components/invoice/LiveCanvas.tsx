@@ -42,7 +42,7 @@ export default function LiveCanvas({
       className="flex w-full lg:w-[60%] h-full bg-slate-50/50 justify-center relative overflow-y-auto p-8"
     >
       {/* Background decoration */}
-      <div className="absolute inset-0 grid grid-cols-[20] opacity-[0.03] pointer-events-none fixed">
+      <div className="absolute inset-0 grid grid-cols-[20] opacity-[0.03] pointer-events-none">
         {/* Simple grid lines could go here */}
       </div>
 
