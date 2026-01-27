@@ -65,14 +65,17 @@ export function useInvoice() {
     data,
     setData,
     calculations,
-    actions: {
-      setClient,
-      updateItem,
-      addItem,
-      removeItem,
-      setInvoiceNumber: (num: string) =>
-        setData((prev) => ({ ...prev, number: num })),
-      resetInvoice: () => setData(INITIAL_INVOICE),
-    },
+    actions: useMemo(
+      () => ({
+        setClient,
+        updateItem,
+        addItem,
+        removeItem,
+        setInvoiceNumber: (num: string) =>
+          setData((prev) => ({ ...prev, number: num })),
+        resetInvoice: () => setData(INITIAL_INVOICE),
+      }),
+      [],
+    ),
   };
 }
