@@ -63,9 +63,7 @@ export default function InvoicePage() {
     documentTitle: data.number ? `Factura-${data.number}` : "Factura",
     onPrintError: (errorLocation, error) => {
       console.warn("Print Warning (non-critical):", error);
-    },
-    onBeforeGetContent: () => {
-      setIsExporting(true);
+      setIsExporting(false);
     },
     onAfterPrint: () => {
       setIsExporting(false);
@@ -73,6 +71,7 @@ export default function InvoicePage() {
   });
 
   const handleExportPDF = () => {
+    setIsExporting(true);
     if (handlePrint) {
       handlePrint();
     }
