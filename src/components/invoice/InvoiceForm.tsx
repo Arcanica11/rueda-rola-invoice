@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Plus,
-  Trash2,
-  Calendar as CalendarIcon,
-  FileText,
-  User,
-} from "lucide-react";
+import { Plus, Trash2, FileText, User } from "lucide-react";
 import { InvoiceData, InvoiceItem } from "@/types/invoice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +19,8 @@ interface InvoiceFormProps {
     ) => void;
     addItem: () => void;
     removeItem: (id: string) => void;
+    setNotes: (notes: string) => void;
+    setDeposit: (amount: number) => void;
   };
 }
 
@@ -43,44 +39,75 @@ export default function InvoiceForm({
             Datos del Cliente
           </h3>
         </div>
-        <div className="grid gap-4 p-4 rounded-xl border border-border/50 bg-white/50">
-          <div className="grid gap-2">
-            <Label>Nombre / Razón Social</Label>
-            <Input
-              value={data.client.name}
-              onChange={(e) => actions.setClient("name", e.target.value)}
-              placeholder="Ej. Tacos Michoacán LLC"
-              disabled={isLocked}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Dirección</Label>
-            <Input
-              value={data.client.address}
-              onChange={(e) => actions.setClient("address", e.target.value)}
-              placeholder="Calle Principal 123, Ciudad..."
-              disabled={isLocked}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-6 p-6 rounded-xl border border-border bg-white shadow-sm">
+          {/* Row 1: Name & Company */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label>Email</Label>
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Nombre del Cliente
+              </Label>
               <Input
-                value={data.client.email}
-                onChange={(e) => actions.setClient("email", e.target.value)}
-                placeholder="cliente@ejemplo.com"
+                value={data.client.name}
+                onChange={(e) => actions.setClient("name", e.target.value)}
+                placeholder="Nombre de la persona"
+                className="h-11 text-base font-medium"
                 disabled={isLocked}
               />
             </div>
             <div className="grid gap-2">
-              <Label>RFC / Tax ID</Label>
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Empresa / Compañía
+              </Label>
               <Input
-                value={data.client.taxId}
-                onChange={(e) => actions.setClient("taxId", e.target.value)}
-                placeholder="XAXX010101000"
+                value={data.client.company || ""}
+                onChange={(e) => actions.setClient("company", e.target.value)}
+                placeholder="Nombre de la empresa"
+                className="h-11 text-base"
                 disabled={isLocked}
               />
             </div>
+          </div>
+
+          {/* Row 2: Address & Phone */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid gap-2 sm:col-span-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Dirección
+              </Label>
+              <Input
+                value={data.client.address}
+                onChange={(e) => actions.setClient("address", e.target.value)}
+                placeholder="Calle Principal 123, Ciudad..."
+                className="h-11 text-base"
+                disabled={isLocked}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Teléfono
+              </Label>
+              <Input
+                value={data.client.phone || ""}
+                onChange={(e) => actions.setClient("phone", e.target.value)}
+                placeholder="(555) 123-4567"
+                className="h-11 text-base"
+                disabled={isLocked}
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Email (Hidden/Optional) */}
+          <div className="grid gap-2">
+            <Label className="text-xs font-bold uppercase text-slate-500">
+              Email (Opcional)
+            </Label>
+            <Input
+              value={data.client.email}
+              onChange={(e) => actions.setClient("email", e.target.value)}
+              placeholder="cliente@ejemplo.com"
+              className="h-10 text-sm"
+              disabled={isLocked}
+            />
           </div>
         </div>
       </section>
@@ -105,18 +132,18 @@ export default function InvoiceForm({
           </Button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <AnimatePresence initial={false}>
-            {data.items.map((item, index) => (
+            {data.items.map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="group relative grid grid-cols-12 gap-2 items-start p-3 rounded-lg border border-border/40 bg-white/30 hover:bg-white/80 transition-all"
+                className="group relative grid grid-cols-12 gap-3 items-start p-4 rounded-xl border border-border/60 bg-white shadow-sm hover:shadow-md transition-all"
               >
-                <div className="col-span-7 space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">
+                <div className="col-span-12 sm:col-span-6 space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     Descripción
                   </Label>
                   <Input
@@ -125,12 +152,12 @@ export default function InvoiceForm({
                       actions.updateItem(item.id, "description", e.target.value)
                     }
                     placeholder="Descripción del servicio"
-                    className="h-8 text-sm"
+                    className="h-10 text-base"
                     disabled={isLocked}
                   />
                 </div>
-                <div className="col-span-2 space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">
+                <div className="col-span-4 sm:col-span-2 space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     Cant.
                   </Label>
                   <Input
@@ -143,15 +170,15 @@ export default function InvoiceForm({
                         Number(e.target.value),
                       )
                     }
-                    className="h-8 text-sm text-right font-mono"
+                    className="h-10 text-base text-right font-mono"
                     disabled={isLocked}
                   />
                 </div>
-                <div className="col-span-3 space-y-1 relative">
-                  <Label className="text-[10px] text-muted-foreground">
+                <div className="col-span-8 sm:col-span-4 space-y-1.5 relative">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     Precio
                   </Label>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <Input
                       type="number"
                       value={item.price}
@@ -162,23 +189,64 @@ export default function InvoiceForm({
                           Number(e.target.value),
                         )
                       }
-                      className="h-8 text-sm text-right font-mono"
+                      className="h-10 text-base text-right font-mono"
                       disabled={isLocked}
                     />
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity absolute -right-10 top-6"
+                      className="h-10 w-10 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                       onClick={() => actions.removeItem(item.id)}
                       disabled={isLocked}
+                      title="Eliminar Item"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Financials & Notes Section */}
+      <section className="space-y-6 pt-4 border-t border-border">
+        {/* Deposit */}
+        <div className="grid gap-2 p-6 rounded-xl border border-border bg-white shadow-sm">
+          <Label className="text-xs font-bold uppercase text-slate-500">
+            Depósito / Anticipo (Deposit Paid)
+          </Label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+              $
+            </span>
+            <Input
+              type="number"
+              value={data.payments?.[0]?.amount || ""}
+              onChange={(e) => actions.setDeposit(Number(e.target.value))}
+              placeholder="0.00"
+              className="h-11 pl-8 text-lg font-mono font-medium"
+              disabled={isLocked}
+            />
+          </div>
+          <p className="text-[10px] text-slate-400">
+            Este monto se restará del total.
+          </p>
+        </div>
+
+        {/* Notes */}
+        <div className="grid gap-2">
+          <Label className="text-xs font-bold uppercase text-slate-500">
+            Notas (Notes)
+          </Label>
+          <textarea
+            value={data.notes || ""}
+            onChange={(e) => actions.setNotes(e.target.value)}
+            placeholder="Thank you for your business..."
+            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+            disabled={isLocked}
+          />
         </div>
       </section>
     </div>

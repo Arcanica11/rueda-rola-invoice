@@ -33,8 +33,8 @@ export default function ControlPanel({
   onPrint,
 }: ControlPanelProps) {
   return (
-    <div className="w-full lg:w-[40%] h-full overflow-y-auto overflow-x-hidden lg:overflow-visible bg-background/80 backdrop-blur-xl border-r border-border p-6 lg:p-10 print:hidden no-print form-container">
-      <div className="max-w-xl mx-auto space-y-8">
+    <div className="w-full h-full lg:overflow-visible bg-background/80 backdrop-blur-xl p-6 lg:p-10 pb-28 lg:pb-10 print:hidden no-print form-container">
+      <div className="max-w-2xl mx-auto space-y-8">
         {/* Header & Buttons */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 print:hidden z-50 relative">
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-purple-400 shrink-0">
@@ -97,7 +97,7 @@ export default function ControlPanel({
 
         {/* Footer info */}
         <div className="text-xs text-center text-muted-foreground mt-4 pb-4 opacity-50">
-          Design System v2026.1 • Arknica
+          Design System v2026.1 • Rueda La Rola Media
         </div>
       </div>
     </div>

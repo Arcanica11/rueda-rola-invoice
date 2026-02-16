@@ -2,40 +2,53 @@ import { InvoiceData } from "@/types/invoice";
 
 export default function InvoiceHeader({ data }: { data: InvoiceData }) {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-6 md:gap-0 mb-8 md:mb-12 relative z-[20]">
+    <div className="flex flex-row justify-between items-start mb-12 relative z-20 font-sans">
       {/* Brand Identity */}
-      <div className="flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-2">
+      <div className="flex items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/imagenes/LOGO-RuedaLaRola.png"
-          alt="Rueda La Rola"
-          className="w-auto h-16 md:h-24 object-contain"
+          alt="Rueda La Rola Media"
+          className="w-32 h-32 object-contain"
         />
-        <div className="md:mt-4 text-left">
-          <h2 className="font-bold text-slate-900 text-base md:text-lg">
-            Rueda Rola Invoice
+        <div className="flex flex-col justify-center">
+          <h2 className="font-bold text-slate-900 text-2xl uppercase tracking-tighter leading-none">
+            RUEDA LA ROLA
+            <br />
+            <span className="text-primary">MEDIA</span>
           </h2>
-          <p className="text-slate-500 text-xs md:text-sm">
-            Creative Studio & Development
+          <p className="text-slate-500 text-sm font-medium tracking-widest mt-1 uppercase">
+            YOUR ART COMES TO LIFE
           </p>
         </div>
       </div>
 
       {/* Invoice Details */}
-      <div className="w-full md:w-auto text-left md:text-right flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end border-t md:border-0 pt-4 md:pt-0 border-slate-100 mt-2 md:mt-0">
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 mb-0 md:mb-2">
-          FACTURA
+      <div className="text-right mt-0">
+        <h1 className="text-6xl font-black tracking-tighter text-slate-900 mb-2 uppercase">
+          INVOICE
         </h1>
-        <div className="flex flex-col items-end space-y-0.5 md:space-y-1">
-          <span className="text-primary font-mono text-lg md:text-xl font-bold">
-            {data.number}
-          </span>
-          <p className="text-slate-400 text-xs md:text-sm font-medium uppercase tracking-wide">
-            {data.date.toLocaleDateString("es-MX", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+        <div className="space-y-1">
+          <div className="flex justify-end gap-3 items-baseline">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              NO.
+            </span>
+            <span className="text-slate-800 font-mono text-lg font-bold">
+              {data.number}
+            </span>
+          </div>
+          <div className="flex justify-end gap-3 items-baseline">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              DATE
+            </span>
+            <span className="text-slate-600 text-sm font-medium">
+              {data.date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
+          </div>
         </div>
       </div>
     </div>
