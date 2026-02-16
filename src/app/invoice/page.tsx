@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useInvoice } from "@/hooks/use-invoice";
+import { InvoiceData } from "@/types/invoice";
 import SplitLayout from "@/components/layout/SplitLayout";
 import ControlPanel from "@/components/invoice/ControlPanel";
 // InvoiceForm moved to ControlPanel
@@ -16,7 +17,8 @@ import InvoiceHistory, {
 } from "@/components/invoice/InvoiceHistory";
 // Icons and Button removed as they are now in ControlPanel
 import { supabase } from "@/lib/supabase";
-import { useReactToPrint } from "react-to-print";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 export default function InvoicePage() {
@@ -58,17 +60,58 @@ export default function InvoicePage() {
     document.title = data.number ? `Factura ${data.number}` : "Nueva Factura";
   }, [data.number]);
 
-  const handleExportPDF = useReactToPrint({
-    contentRef: canvasRef,
-    documentTitle: data.number ? `Factura-${data.number}` : "Factura",
-    onPrintError: (errorLocation, error) => {
-      console.warn("Print logic warning", error);
+  // -- PDF Export logic using html2canvas & jspdf --
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      if (!canvasRef.current) throw new Error("Canvas ref is null");
+
+      const element = canvasRef.current;
+
+      // Temporarily remove transform/scaling if any
+      const originalTransform = element.style.transform;
+      element.style.transform = "none";
+
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher scale for better resolution
+        useCORS: true, // For images
+        backgroundColor: "#ffffff",
+      });
+
+      // Restore transform
+      element.style.transform = originalTransform;
+
+      const imgData = canvas.toDataURL("image/png");
+
+      // A4 size in mm
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+
+      // Auto-save
+      const fileName = data.number
+        ? `Factura-${data.number}.pdf`
+        : "Factura-RuedaRola.pdf";
+      pdf.save(fileName);
+
+      toast.success("PDF generado exitosamente");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Error al generar PDF");
+    } finally {
       setIsExporting(false);
-    },
-    onAfterPrint: () => {
-      setIsExporting(false);
-    },
-  });
+    }
+  };
 
   const handleSaveInvoice = async () => {
     if (!data.client.name) {
@@ -95,7 +138,7 @@ export default function InvoicePage() {
           subtotal: calculations.subtotal,
           tax_amount: calculations.tax,
           total_amount: calculations.total,
-          status: "closed",
+          status: "pending", // Default to pending when saving
         })
         .select()
         .single();
@@ -153,12 +196,13 @@ export default function InvoicePage() {
         price: item.unit_price,
       }));
 
-      const newInvoiceData = {
+      const newInvoiceData: InvoiceData = {
         number: invoice.invoice_number,
         date: new Date(invoice.created_at),
         dueDate: new Date(
           new Date(invoice.created_at).getTime() + 7 * 24 * 60 * 60 * 1000,
         ),
+        status: (invoice.status as InvoiceData["status"]) || "paid", // Cast or default
         client: {
           name: invoice.client_name || "",
           address: invoice.client_address || "",
@@ -230,7 +274,10 @@ export default function InvoicePage() {
                     </p>
                   </div>
 
-                  <InvoiceSummary calculations={calculations} />
+                  <InvoiceSummary
+                    calculations={calculations}
+                    payments={data.payments || []}
+                  />
                 </div>
               </div>
               <div className="mt-8 pt-4 border-t border-slate-100 text-xs text-slate-400 text-center">
