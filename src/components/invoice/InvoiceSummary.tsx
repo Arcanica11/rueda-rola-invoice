@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { Payment } from "@/types/invoice";
 
 interface Calculations {
@@ -29,40 +28,50 @@ export default function InvoiceSummary({
 
   return (
     <div className="flex justify-end mt-8 relative z-10 w-full">
-      <div className="w-full max-w-[300px] space-y-3">
-        <div className="flex justify-between text-slate-500 text-sm">
-          <span className="font-medium">Subtotal</span>
-          <span className="font-mono">
+      <div className="w-full max-w-[350px] space-y-3 bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+        {/* Sub-total */}
+        <div className="flex justify-between text-slate-600 text-sm">
+          <span className="font-bold uppercase tracking-wide">Sub-total</span>
+          <span className="font-mono font-medium">
             {formatCurrency(calculations.subtotal)}
           </span>
         </div>
-        <div className="flex justify-between text-slate-500 text-sm">
-          <span className="font-medium">
-            Tax ({(calculations.taxRate * 100).toFixed(2)}%)
+
+        {/* Sales Tax */}
+        <div className="flex justify-between text-slate-600 text-sm">
+          <span className="font-bold uppercase tracking-wide">
+            Sales Tax ({(calculations.taxRate * 100).toFixed(2)}%)
           </span>
-          <span className="font-mono">{formatCurrency(calculations.tax)}</span>
+          <span className="font-mono font-medium">
+            {formatCurrency(calculations.tax)}
+          </span>
         </div>
 
-        <div className="h-px bg-slate-200 my-2" />
+        <div className="h-px bg-slate-800 my-2" />
 
-        <div className="flex justify-between text-slate-900 font-semibold">
-          <span>Total</span>
+        {/* TOTAL */}
+        <div className="flex justify-between text-slate-900 font-black text-lg">
+          <span className="uppercase">TOTAL</span>
           <span>{formatCurrency(calculations.total)}</span>
         </div>
 
-        {payments.length > 0 && (
-          <div className="flex justify-between text-emerald-600 text-sm font-medium">
-            <span>Pagado (Abonos)</span>
-            <span>-{formatCurrency(totalPaid)}</span>
-          </div>
-        )}
+        {/* Deposit Paid */}
+        <div className="flex justify-between text-slate-500 text-sm font-medium">
+          <span className="uppercase tracking-wide">Deposit Paid</span>
+          <span className="font-mono text-red-500">
+            - {formatCurrency(totalPaid)}
+          </span>
+        </div>
 
         <div className="h-px bg-slate-200 my-2" />
 
-        <div className="flex justify-between items-baseline p-2 bg-red-50/50 rounded-lg border border-red-100">
-          <span className="font-bold text-lg text-red-900">Balance Due</span>
-          <span className="font-black text-2xl tracking-tight text-red-600">
-            {formatCurrency(balanceDue)}
+        {/* Balance Due */}
+        <div className="flex justify-between items-center p-3 bg-slate-900 text-white rounded-md shadow-md">
+          <span className="font-bold uppercase tracking-widest text-xs">
+            Balance Due
+          </span>
+          <span className="font-black text-xl tracking-tight">
+            {formatCurrency(balanceDue > 0 ? balanceDue : 0)}
           </span>
         </div>
       </div>

@@ -6,34 +6,52 @@ export default function ClientInfo({
   client: InvoiceData["client"];
 }) {
   return (
-    <div className="mb-12 relative z-10 grid grid-cols-2 gap-8">
-      <div>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-          Facturar a
+    <div className="mb-4 relative z-10">
+      <div className="bg-slate-50/50 rounded-lg p-3 border border-slate-100">
+        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">
+          Client Information
         </h3>
-        <div className="text-slate-800 space-y-1">
-          <p className="font-bold text-lg">
-            {client.name || (
-              <span className="text-slate-300 text-base font-normal">
-                Nombre del Cliente
-              </span>
-            )}
-          </p>
-          <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
-            {client.address || "Dirección del Cliente"}
-          </p>
-          <p className="text-sm text-slate-600 font-mono mt-2">
-            {client.email && (
-              <span className="block text-primary/80">{client.email}</span>
-            )}
-            {client.taxId && (
-              <span className="block font-medium">RFC: {client.taxId}</span>
-            )}
-          </p>
+        <div className="grid grid-cols-4 gap-4">
+          {/* Client Name */}
+          <div className="col-span-1">
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              Client Name
+            </label>
+            <p className="text-slate-900 font-bold text-sm leading-tight truncate">
+              {client.name || "N/A"}
+            </p>
+          </div>
+
+          {/* Company Name */}
+          <div className="col-span-1">
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              Company Name
+            </label>
+            <p className="text-slate-700 font-medium text-xs truncate">
+              {client.company || "-"}
+            </p>
+          </div>
+
+          {/* Address */}
+          <div className="col-span-1">
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              Address
+            </label>
+            <p className="text-slate-600 text-xs truncate">
+              {client.address || "-"}
+            </p>
+          </div>
+
+          {/* Phone */}
+          <div className="col-span-1">
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              Phone
+            </label>
+            <p className="text-slate-700 font-mono text-xs">
+              {client.phone || "-"}
+            </p>
+          </div>
         </div>
-      </div>
-      <div>
-        {/* Placeholder for optional shipping or other info, keeping balance */}
       </div>
     </div>
   );

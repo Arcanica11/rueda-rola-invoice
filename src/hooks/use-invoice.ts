@@ -73,6 +73,20 @@ export function useInvoice() {
         removeItem,
         setInvoiceNumber: (num: string) =>
           setData((prev) => ({ ...prev, number: num })),
+        setNotes: (notes: string) => setData((prev) => ({ ...prev, notes })),
+        setDeposit: (amount: number) =>
+          setData((prev) => {
+            const newPayment = {
+              date: new Date().toISOString(),
+              amount,
+              method: "Deposit",
+            };
+            // Replace or add the first payment as deposit
+            const newPayments = prev.payments?.length
+              ? [{ ...prev.payments[0], amount }, ...prev.payments.slice(1)]
+              : [newPayment];
+            return { ...prev, payments: newPayments };
+          }),
         resetInvoice: () => setData(INITIAL_INVOICE),
       }),
       [],

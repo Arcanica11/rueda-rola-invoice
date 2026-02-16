@@ -86,7 +86,7 @@ export default function LandingPage() {
           </div>
           <h3 className="text-2xl font-bold mb-3 text-slate-800">Imprimir</h3>
           <p className="text-slate-500 font-medium leading-relaxed">
-            Botón 'Exportar PDF' = Tu hoja lista.
+            Botón &apos;Exportar PDF&apos; = Tu hoja lista.
           </p>
         </motion.div>
 
@@ -100,7 +100,7 @@ export default function LandingPage() {
           </div>
           <h3 className="text-2xl font-bold mb-3 text-slate-800">Repetir</h3>
           <p className="text-slate-500 font-medium leading-relaxed">
-            ¿Nueva venta? Botón 'Nueva Factura'.
+            ¿Nueva venta? Botón &apos;Nueva Factura&apos;.
           </p>
         </motion.div>
       </motion.div>

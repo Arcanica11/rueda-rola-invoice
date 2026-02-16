@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { Button } from "../ui/button";
+
 import { Eye, Pencil } from "lucide-react";
 
 interface SplitLayoutProps {
@@ -45,14 +45,14 @@ export default function SplitLayout({
 
       {/* Left Panel - Control Panel Content */}
       <div
-        className={`${activeTab === "edit" ? "block" : "hidden"} lg:block w-full lg:w-[40%] h-full overflow-hidden`}
+        className={`${activeTab === "edit" ? "block" : "hidden"} lg:block w-full lg:w-[45%] xl:w-[40%] h-full overflow-y-auto border-r border-slate-200 shadow-xl z-20`}
       >
         {controlPanelContent}
       </div>
 
       {/* Right Panel - Live Canvas Content */}
       <main
-        className={`${activeTab === "preview" ? "block" : "hidden"} lg:block flex-1 bg-slate-100/50 relative overflow-y-auto overflow-x-hidden flex flex-col print:overflow-visible print:h-auto print:bg-white`}
+        className={`${activeTab === "preview" ? "block" : "hidden"} lg:block flex-1 bg-slate-100/50 relative overflow-y-auto overflow-x-auto flex flex-col print:overflow-visible print:h-auto print:bg-white`}
       >
         {liveCanvasContent}
       </main>

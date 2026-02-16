@@ -27,8 +27,10 @@ export interface InvoiceData {
     | "cancelled";
   client: {
     name: string;
-    address: string;
+    company?: string;
     email: string;
+    address: string;
+    phone?: string;
     taxId: string;
   };
   items: InvoiceItem[];
@@ -50,8 +52,10 @@ export const INITIAL_INVOICE: InvoiceData = {
   status: "draft",
   client: {
     name: "",
+    company: "",
     address: "",
     email: "",
+    phone: "",
     taxId: "",
   },
   items: [
