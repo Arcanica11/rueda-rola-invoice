@@ -2,6 +2,7 @@
 
 import { appendRow, readSheet, getFirstSheetTitle } from "@/lib/google-sheets";
 import { InvoiceData } from "@/types/invoice";
+import { revalidatePath } from "next/cache";
 
 // User provided 1Q1VveJEsQLsxEYdEilBFFIlrZlattbknHdHUzPB808g as LOGS ID
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_LOGS_ID || "";
@@ -68,6 +69,8 @@ export async function saveInvoice(data: InvoiceData) {
       sheetName,
       range: result.updates?.updatedRange,
     });
+
+    revalidatePath("/invoice");
 
     return {
       success: true,

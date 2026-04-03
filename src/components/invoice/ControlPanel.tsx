@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useInvoice } from "@/hooks/use-invoice";
 import { InvoiceData } from "@/types/invoice";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface ControlPanelProps {
   onSave: () => void;
   onNew: () => void;
   onHistory: () => void;
-  onPrint: () => void;
+  onPrint: (fileName: string) => void;
 }
 
 export default function ControlPanel({
@@ -32,6 +33,13 @@ export default function ControlPanel({
   onHistory,
   onPrint,
 }: ControlPanelProps) {
+  const defaultFileName = data.number ? `Factura-${data.number}` : "Factura-RuedaRola";
+  const [fileName, setFileName] = useState(defaultFileName);
+
+  useEffect(() => {
+    setFileName(data.number ? `Factura-${data.number}` : "Factura-RuedaRola");
+  }, [data.number]);
+
   return (
     <div className="w-full h-full lg:overflow-visible bg-background/80 backdrop-blur-xl p-6 lg:p-10 pb-28 lg:pb-10 print:hidden no-print form-container">
       <div className="max-w-2xl mx-auto space-y-8">
@@ -40,7 +48,20 @@ export default function ControlPanel({
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-purple-400 shrink-0">
             Rueda Rola Invoice
           </h1>
-          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+          <div className="flex flex-wrap lg:flex-nowrap items-end gap-2 w-full lg:w-auto">
+            <div className="flex flex-col gap-1 w-full lg:w-48 shrink-0">
+              <label className="text-[10px] uppercase font-bold text-slate-500">
+                Nombre del PDF
+              </label>
+              <input
+                type="text"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                className="h-11 px-3 rounded-full border border-slate-300 bg-white/80 backdrop-blur text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary w-full shadow-xs"
+                placeholder="Nombre archivo"
+              />
+            </div>
+            
             <Button
               onClick={onHistory}
               variant="outline"
@@ -78,7 +99,7 @@ export default function ControlPanel({
             )}
 
             <Button
-              onClick={onPrint}
+              onClick={() => onPrint(fileName)}
               disabled={isExporting}
               className="rounded-full shadow-lg shadow-primary/25 no-print h-11 grow lg:grow-0"
             >

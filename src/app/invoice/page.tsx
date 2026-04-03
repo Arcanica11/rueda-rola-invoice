@@ -51,7 +51,7 @@ export default function InvoicePage() {
   }, [data.number]);
 
   // -- PDF Export logic using html2canvas & jspdf --
-  const handleExportPDF = async () => {
+  const handleExportPDF = async (customFileName: string) => {
     setIsExporting(true);
     try {
       if (!canvasRef.current) throw new Error("Canvas ref is null");
@@ -97,7 +97,7 @@ export default function InvoicePage() {
       // Restore transform
       if (wrapper) wrapper.style.transform = originalTransform;
 
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/jpeg", 0.75);
 
       // A4 size in mm
       const pdf = new jsPDF({
@@ -107,18 +107,31 @@ export default function InvoicePage() {
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      // const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
       const imgProps = pdf.getImageProperties(imgData);
       const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+      let heightLeft = imgHeight;
+      let position = 0;
 
-      // Auto-save
-      const fileName = data.number
-        ? `Factura-${data.number}.pdf`
-        : "Factura-RuedaRola.pdf";
-      pdf.save(fileName);
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position -= pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Auto-save with custom or default name
+      let finalFileName = customFileName || (data.number ? `Factura-${data.number}` : "Factura-RuedaRola");
+      if (!finalFileName.toLowerCase().endsWith(".pdf")) {
+        finalFileName += ".pdf";
+      }
+      
+      pdf.save(finalFileName);
 
       toast.success("PDF generado exitosamente");
     } catch (error) {
