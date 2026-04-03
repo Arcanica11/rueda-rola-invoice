@@ -20,6 +20,7 @@ interface InvoiceFormProps {
     addItem: () => void;
     removeItem: (id: string) => void;
     setNotes: (notes: string) => void;
+    setDate: (date: Date) => void;
     setDeposit: (amount: number) => void;
   };
 }
@@ -96,18 +97,38 @@ export default function InvoiceForm({
             </div>
           </div>
 
-          {/* Row 3: Email (Hidden/Optional) */}
-          <div className="grid gap-2">
-            <Label className="text-xs font-bold uppercase text-slate-500">
-              Email (Opcional)
-            </Label>
-            <Input
-              value={data.client.email}
-              onChange={(e) => actions.setClient("email", e.target.value)}
-              placeholder="cliente@ejemplo.com"
-              className="h-10 text-sm"
-              disabled={isLocked}
-            />
+          {/* Row 3: Email (Hidden/Optional) and Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Email (Opcional)
+              </Label>
+              <Input
+                value={data.client.email}
+                onChange={(e) => actions.setClient("email", e.target.value)}
+                placeholder="cliente@ejemplo.com"
+                className="h-10 text-sm"
+                disabled={isLocked}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">
+                Fecha de Factura
+              </Label>
+              <Input
+                type="date"
+                value={data.date.toISOString().split("T")[0]}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    // Convert yyyy-mm-dd to local Date without timezone shifting by using parts
+                    const [year, month, day] = e.target.value.split('-').map(Number);
+                    actions.setDate(new Date(year, month - 1, day));
+                  }
+                }}
+                className="h-10 text-sm"
+                disabled={isLocked}
+              />
+            </div>
           </div>
         </div>
       </section>

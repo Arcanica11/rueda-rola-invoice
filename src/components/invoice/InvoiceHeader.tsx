@@ -15,7 +15,7 @@ export default function InvoiceHeader({ data }: { data: InvoiceData }) {
           <h2 className="font-bold text-slate-900 text-2xl uppercase tracking-tighter leading-none">
             RUEDA LA ROLA
             <br />
-            <span className="text-primary">MEDIA</span>
+            <span className="text-primary">MEDIA LLC</span>
           </h2>
           <p className="text-slate-500 text-sm font-medium tracking-widest mt-1 uppercase">
             YOUR ART COMES TO LIFE

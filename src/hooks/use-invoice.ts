@@ -74,6 +74,7 @@ export function useInvoice() {
         setInvoiceNumber: (num: string) =>
           setData((prev) => ({ ...prev, number: num })),
         setNotes: (notes: string) => setData((prev) => ({ ...prev, notes })),
+        setDate: (date: Date) => setData((prev) => ({ ...prev, date })),
         setDeposit: (amount: number) =>
           setData((prev) => {
             const newPayment = {

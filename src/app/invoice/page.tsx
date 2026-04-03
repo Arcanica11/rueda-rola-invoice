@@ -58,12 +58,12 @@ export default function InvoicePage() {
 
       const element = canvasRef.current;
 
-      // Temporarily remove transform/scaling if any
-      const originalTransform = element.style.transform;
-      element.style.transform = "none";
+      const wrapper = element.parentElement;
+      const originalTransform = wrapper ? wrapper.style.transform : "none";
+      if (wrapper) wrapper.style.transform = "none";
 
       const canvas = await html2canvas(element, {
-        scale: 4,
+        scale: 2,
         useCORS: true,
         letterRendering: true,
         allowTaint: true,
@@ -95,7 +95,7 @@ export default function InvoicePage() {
       } as any);
 
       // Restore transform
-      element.style.transform = originalTransform;
+      if (wrapper) wrapper.style.transform = originalTransform;
 
       const imgData = canvas.toDataURL("image/png");
 
@@ -217,8 +217,7 @@ export default function InvoicePage() {
                           />
                         </div>
                         <p className="text-sm text-slate-600 font-medium">
-                          Métodos de pago: Martha P. Martinez Cel. (469)
-                          428-6018
+                          Métodos de pago: Antonieta Galvez Cel (817) 941-0733
                         </p>
                       </div>
 
@@ -250,10 +249,10 @@ export default function InvoicePage() {
 
                       {/* Right: Agency Info */}
                       <div className="text-right space-y-1 text-sm text-slate-600">
-                        <p className="font-bold text-slate-900 text-lg">Patt</p>
-                        <p>469 428 6018</p>
+                        <p className="font-bold text-slate-900 text-lg">Antonieta Galvez</p>
+                        <p>(512) 489-0417</p>
                         <p className="text-primary font-medium">
-                          patt@ruedalarolamedia.com
+                          Antonieta@Ruedalarolamedia.com
                         </p>
                         <p>www.ruedalarolamedia.com</p>
                         <p className="text-slate-500">@ruedalarolamedia</p>
