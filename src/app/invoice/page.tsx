@@ -54,13 +54,17 @@ export default function InvoicePage() {
   const handleExportPDF = async (customFileName: string) => {
     setIsExporting(true);
     try {
+      console.log("1. Verificando referencias del canvas...");
       if (!canvasRef.current) throw new Error("Canvas ref is null");
 
       const element = canvasRef.current;
+      console.log("2. Elemento encontrado:", element);
 
       const wrapper = element.parentElement;
       const originalTransform = wrapper ? wrapper.style.transform : "none";
       if (wrapper) wrapper.style.transform = "none";
+
+      console.log("3. Iniciando html2canvas con scale: 2...");
 
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -115,15 +119,19 @@ export default function InvoicePage() {
       let heightLeft = imgHeight;
       let position = 0;
 
+      console.log("6. Dibujando página inicial en PDF...");
       pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
       heightLeft -= pageHeight;
 
+      console.log("7. Verificando si requiere multipágina...");
       while (heightLeft > 0) {
         position -= pageHeight;
         pdf.addPage();
         pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
         heightLeft -= pageHeight;
       }
+
+      console.log("8. Nombrando el archivo...");
 
       // Auto-save with custom or default name
       let finalFileName = customFileName || (data.number ? `Factura-${data.number}` : "Factura-RuedaRola");
@@ -133,10 +141,13 @@ export default function InvoicePage() {
       
       pdf.save(finalFileName);
 
+      console.log("--- ¡PDF Generado y Guardado con Éxito! ---");
       toast.success("PDF generado exitosamente");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Error al generar PDF");
+    } catch (error: any) {
+      console.error("==== ERROR GENERANDO PDF ====");
+      console.error("Mensaje de error:", error?.message);
+      console.error("Objeto error completo:", error);
+      toast.error("Error al exportar: " + (error?.message || "Revisar consola de navegador"));
     } finally {
       setIsExporting(false);
     }
