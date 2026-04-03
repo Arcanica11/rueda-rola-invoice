@@ -35,8 +35,13 @@ export async function appendRow(
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error appending to Sheet:", error);
+  } catch (error: any) {
+    console.error("==== ERROR EN GOOGLE SHEETS API (appendRow) ====");
+    console.error("Mensaje:", error.message);
+    if (error.response && error.response.data) {
+      console.error("Detalle Google:", JSON.stringify(error.response.data, null, 2));
+    }
+    console.error("=================================================");
     throw error;
   }
 }
@@ -53,8 +58,13 @@ export async function readSheet(spreadsheetId: string, range: string) {
       range,
     });
     return response.data.values || [];
-  } catch (error) {
-    console.error("Error reading Sheet:", error);
+  } catch (error: any) {
+    console.error("==== ERROR EN GOOGLE SHEETS API (readSheet) ====");
+    console.error("Mensaje:", error.message);
+    if (error.response && error.response.data) {
+      console.error("Detalle Google:", JSON.stringify(error.response.data, null, 2));
+    }
+    console.error("================================================");
     throw error;
   }
 }
