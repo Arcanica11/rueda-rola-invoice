@@ -47,12 +47,13 @@ export default function InvoiceForm({
               <Label className="text-xs font-bold uppercase text-slate-500">
                 Nombre del Cliente
               </Label>
-              <Input
+              <textarea
                 value={data.client.name}
                 onChange={(e) => actions.setClient("name", e.target.value)}
-                placeholder="Nombre de la persona"
-                className="h-11 text-base font-medium"
+                placeholder="Persona 1, Persona 2..."
+                className="flex min-h-[44px] w-full rounded-md border border-input bg-background px-3 py-2 text-base font-medium ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
                 disabled={isLocked}
+                rows={2}
               />
             </div>
             <div className="grid gap-2">

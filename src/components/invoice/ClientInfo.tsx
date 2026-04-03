@@ -17,7 +17,7 @@ export default function ClientInfo({
             <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
               Client Name
             </label>
-            <p className="text-slate-900 font-bold text-sm leading-tight truncate">
+            <p className="text-slate-900 font-bold text-sm leading-tight whitespace-pre-wrap">
               {client.name || "N/A"}
             </p>
           </div>
@@ -27,7 +27,7 @@ export default function ClientInfo({
             <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
               Company Name
             </label>
-            <p className="text-slate-700 font-medium text-xs truncate">
+            <p className="text-slate-700 font-medium text-xs whitespace-pre-wrap">
               {client.company || "-"}
             </p>
           </div>
@@ -37,7 +37,7 @@ export default function ClientInfo({
             <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
               Address
             </label>
-            <p className="text-slate-600 text-xs truncate">
+            <p className="text-slate-600 text-xs whitespace-pre-wrap">
               {client.address || "-"}
             </p>
           </div>
