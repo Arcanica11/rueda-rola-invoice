@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useInvoice } from "@/hooks/use-invoice";
 import { InvoiceData } from "@/types/invoice";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2, PlusCircle, Download, History } from "lucide-react";
+import { Save, Loader2, PlusCircle, Download, History, LogOut } from "lucide-react";
 import InvoiceForm from "./InvoiceForm";
+import { logoutUser } from "@/app/actions/auth";
 
 // Infiero el tipo de 'actions' directamente del hook
 type InvoiceActions = ReturnType<typeof useInvoice>["actions"];
@@ -40,8 +41,22 @@ export default function ControlPanel({
     setFileName(data.number ? `Factura-${data.number}` : "Factura-RuedaRola");
   }, [data.number]);
 
+  const handleLogout = async () => {
+    await logoutUser();
+    window.location.href = "/login";
+  };
+
   return (
-    <div className="w-full h-full lg:overflow-visible bg-background/80 backdrop-blur-xl p-6 lg:p-10 pb-28 lg:pb-10 print:hidden no-print form-container">
+    <div className="w-full h-full lg:overflow-visible bg-background/80 backdrop-blur-xl p-6 lg:p-10 pb-28 lg:pb-10 print:hidden no-print form-container relative">
+      <Button 
+        onClick={handleLogout}
+        variant="ghost" 
+        size="icon" 
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 text-slate-400 hover:text-red-500 hover:bg-red-50"
+        title="Cerrar Sesión"
+      >
+        <LogOut className="w-5 h-5" />
+      </Button>
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header & Buttons */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 print:hidden z-50 relative">
