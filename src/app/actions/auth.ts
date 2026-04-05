@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 // In-memory verification mapping mapping username lowercased to their strict password
 const VALID_USERS: Record<string, string> = {
-  antonella: "Rueda2026@",
+  antonieta: "Rueda2026@",
   ivan: "Mima020233",
 };
 
