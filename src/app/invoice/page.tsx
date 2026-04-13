@@ -258,9 +258,6 @@ export default function InvoicePage() {
                             }
                           />
                         </div>
-                        <p className="text-sm text-slate-600 font-medium">
-                          Payment Methods: MG Cel (817) 941-0733
-                        </p>
                       </div>
 
                       <InvoiceSummary
