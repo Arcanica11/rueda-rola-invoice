@@ -1,6 +1,6 @@
 "use server";
 
-import { appendRow, readSheet, getFirstSheetTitle } from "@/lib/google-sheets";
+import { appendRow, readSheet, getFirstSheetTitle, getGoogleSheetsClient } from "@/lib/google-sheets";
 import { InvoiceData } from "@/types/invoice";
 import { revalidatePath } from "next/cache";
 

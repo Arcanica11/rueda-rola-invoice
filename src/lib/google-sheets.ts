@@ -3,7 +3,7 @@ import { google } from "googleapis";
 let auth: any = null;
 let sheets: any = null;
 
-function getGoogleSheetsClient() {
+export function getGoogleSheetsClient() {
   if (sheets) return sheets;
 
   try {
