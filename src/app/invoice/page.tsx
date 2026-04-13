@@ -80,11 +80,11 @@ export default function InvoicePage() {
 
   // -- PDF Export logic using html2canvas & jspdf --
   const handleExportPDF = async (customFileName: string) => {
-    // 1. Auto-save first
+    // 1. Try to auto-save, but don't block PDF if it fails
     const saveResult = await handleSaveInvoice(true);
     if (!saveResult.success) {
-      toast.error(saveResult.error || "No se pudo guardar la factura. Verifique los datos.");
-      return;
+      toast.error("Note: Invoice couldn't be synced to Google Sheets, but generating PDF anyway.");
+      console.warn("Auto-save failed:", saveResult.error);
     }
 
     setIsExporting(true);
