@@ -12,16 +12,26 @@ export function getGoogleSheetsClient() {
 
     if (rawKeys) {
       try {
-        // 1. Remove any outer quotes that Vercel or local .env might have added
-        const sanitizedKeys = rawKeys.trim().replace(/^['"]|['"]$/g, '');
-        credentials = JSON.parse(sanitizedKeys);
+        let jsonString = rawKeys.trim().replace(/^['"]|['"]$/g, '');
+        
+        // Detect if it is Base64 (simple heuristic: no { at start and no whitespace)
+        if (!jsonString.startsWith('{') && !jsonString.includes(' ')) {
+          try {
+            console.log("Detecting Base64 encoded credentials, decoding...");
+            jsonString = Buffer.from(jsonString, 'base64').toString('utf8');
+          } catch (e) {
+            console.warn("Base64 detection triggered but decoding failed, proceeding with raw string.");
+          }
+        }
+
+        credentials = JSON.parse(jsonString);
         
         if (credentials.private_key) {
           // 2. Ultra-robust newline normalization
-          // Handles: literal \n strings, double-escaped \\n, and actual encoded newlines
           const normalizedKey = credentials.private_key
-            .replace(/\\n/g, '\n')      // Convert literal \n to actual newline
-            .replace(/\n\n/g, '\n')    // Remove double newlines if any
+            .replace(/\\n/g, '\n')
+            .replace(/\n\n/g, '\n')
+            .replace(/\r/g, '')
             .trim();
 
           credentials.private_key = normalizedKey;
