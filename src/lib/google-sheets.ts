@@ -12,64 +12,49 @@ export function getGoogleSheetsClient() {
 
     if (rawKeys) {
       try {
-        let jsonString = rawKeys.trim().replace(/^['"]|['"]$/g, '');
-        
-        // Detect if it is Base64 (simple heuristic: no { at start and no whitespace)
-        if (!jsonString.startsWith('{') && !jsonString.includes(' ')) {
-          try {
-            console.log("Detecting Base64 encoded credentials, decoding...");
-            jsonString = Buffer.from(jsonString, 'base64').toString('utf8');
-          } catch (e) {
-            console.warn("Base64 detection triggered but decoding failed, proceeding with raw string.");
-          }
-        }
-
-        credentials = JSON.parse(jsonString);
-        
-        if (credentials.private_key) {
-          // 2. Ultra-robust newline normalization
-          const normalizedKey = credentials.private_key
-            .replace(/\\n/g, '\n')
-            .replace(/\n\n/g, '\n')
-            .replace(/\r/g, '')
-            .trim();
-
-          credentials.private_key = normalizedKey;
-
-          // 3. SAFE DIAGNOSTIC LOG (Masked)
-          // This helps verify if the key starts and ends correctly without leaking it
-          const keyCheck = normalizedKey.trim();
-          const startsWithHeader = keyCheck.startsWith("-----BEGIN PRIVATE KEY-----");
-          const endsWithFooter = keyCheck.endsWith("-----END PRIVATE KEY-----");
-          
-          console.log("==== GOOGLE AUTH DIAGNOSTIC ====");
-          console.log(`Key length: ${keyCheck.length} chars`);
-          console.log(`Header OK: ${startsWithHeader}`);
-          console.log(`Footer OK: ${endsWithFooter}`);
-          console.log("================================");
-
-          if (!startsWithHeader || !endsWithFooter) {
-            console.error("CRITICAL: The private key is missing the standard PEM header/footer.");
-          }
-        }
+        const sanitizedKeys = rawKeys.trim().replace(/^['"]|['"]$/g, '');
+        credentials = JSON.parse(sanitizedKeys);
       } catch (e: any) {
         console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
-        console.error("Raw Keys Start (debug):", rawKeys.substring(0, 20) + "...");
       }
     }
-    
-    // Explicitly pass credentials with cleaned private key
-    auth = new google.auth.GoogleAuth({
-      credentials: credentials ? {
-        client_email: credentials.client_email,
-        private_key: credentials.private_key,
-        project_id: credentials.project_id
-      } : undefined,
-      keyFile: !credentials && !rawKeys ? "service-account.json" : undefined,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
 
-    sheets = google.sheets({ version: "v4", auth });
+    // Fallback to local file if no env var
+    if (!credentials) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const filePath = path.join(process.cwd(), 'service-account.json');
+        if (fs.existsSync(filePath)) {
+          credentials = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        }
+      } catch (e) {
+        console.error("Local service-account.json not found or unreadable.");
+      }
+    }
+
+    if (!credentials || !credentials.private_key || !credentials.client_email) {
+      console.error("GOOGLE AUTH ERROR: Missing vital credentials (email or private_key)");
+      return null;
+    }
+
+    // Ultra-clean the private key
+    const cleanKey = credentials.private_key
+      .replace(/\\n/g, '\n')
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0)
+      .join('\n');
+
+    // Use JWT directly for more predictable signing
+    const jwtClient = new google.auth.JWT(
+      credentials.client_email,
+      undefined,
+      cleanKey,
+      ['https://www.googleapis.com/auth/spreadsheets']
+    );
+
+    sheets = google.sheets({ version: "v4", auth: jwtClient });
     return sheets;
   } catch (e) {
     console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
