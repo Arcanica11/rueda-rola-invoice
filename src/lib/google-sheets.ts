@@ -1,12 +1,21 @@
 import { google } from "googleapis";
 
+let credentials;
+try {
+  credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
+    ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEYS)
+    : undefined;
+} catch (e) {
+  console.error("CRITICAL ERROR: GOOGLE_SERVICE_ACCOUNT_KEYS is not a valid JSON string.");
+  console.error("Check for trailing commas, escaped characters, or hidden newlines.");
+  credentials = undefined;
+}
+
 // Authenticate with Service Account
 // Supports both local file (dev) and Env Var (prod/Vercel)
 const auth = new google.auth.GoogleAuth({
-  credentials: process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
-    ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEYS)
-    : undefined,
-  keyFile: !process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
+  credentials,
+  keyFile: !credentials && !process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
     ? "service-account.json"
     : undefined,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],

@@ -53,11 +53,11 @@ export default function InvoicePage() {
   const handleSaveInvoice = async (silent = false) => {
     if (!data.client.name) {
       if (!silent) toast.error("Nombre de cliente requerido");
-      return { success: false };
+      return { success: false, error: "Nombre de cliente requerido" };
     }
     if (data.items.length === 0) {
       if (!silent) toast.error("Agregue ítems a la factura");
-      return { success: false };
+      return { success: false, error: "Agregue ítems a la factura" };
     }
 
     setIsSaving(true);
@@ -70,8 +70,9 @@ export default function InvoicePage() {
       return { success: true };
     } catch (error: any) {
       console.error("Error saving invoice:", error);
-      if (!silent) toast.error(error.message || "Error al guardar");
-      return { success: false };
+      const msg = error.message || "Error al guardar";
+      if (!silent) toast.error(msg);
+      return { success: false, error: msg };
     } finally {
       setIsSaving(false);
     }
@@ -82,7 +83,7 @@ export default function InvoicePage() {
     // 1. Auto-save first
     const saveResult = await handleSaveInvoice(true);
     if (!saveResult.success) {
-      toast.error("No se pudo guardar la factura antes de exportar. Verifique los datos.");
+      toast.error(saveResult.error || "No se pudo guardar la factura. Verifique los datos.");
       return;
     }
 
