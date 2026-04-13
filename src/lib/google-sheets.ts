@@ -6,28 +6,43 @@ let sheets: any = null;
 function getGoogleSheetsClient() {
   if (sheets) return sheets;
 
-  let credentials;
   try {
-    if (process.env.GOOGLE_SERVICE_ACCOUNT_KEYS) {
-      credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEYS);
-      // Fix for Vercel/Node 17+ private key formatting
-      if (credentials.private_key) {
-        credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    const rawKeys = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS;
+    let credentials;
+
+    if (rawKeys) {
+      try {
+        // Handle case where env var might have escaped quotes
+        const sanitizedKeys = rawKeys.trim().replace(/^['"]|['"]$/g, '');
+        credentials = JSON.parse(sanitizedKeys);
+        
+        if (credentials.private_key) {
+          // Fix for Vercel/Node 17+ private key formatting
+          // Replaces both double-escaped (\\n) and literal \n if they survived JSON.parse incorrectly
+          credentials.private_key = credentials.private_key
+            .replace(/\\n/g, '\n')
+            .replace(/\n/g, '\n'); // Ensure actual newlines are preserved
+          
+          // Debug check (hidden from user)
+          if (!credentials.private_key.includes("-----BEGIN PRIVATE KEY-----")) {
+            console.error("GOOGLE AUTH ERROR: private_key does not contain expected header.");
+          }
+        }
+      } catch (e: any) {
+        console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
       }
     }
     
     auth = new google.auth.GoogleAuth({
       credentials,
-      keyFile: !credentials && !process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
-        ? "service-account.json"
-        : undefined,
+      keyFile: !credentials && !rawKeys ? "service-account.json" : undefined,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
     sheets = google.sheets({ version: "v4", auth });
     return sheets;
   } catch (e) {
-    console.error("GOOGLE SHEETS AUTH ERROR:", e);
+    console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
     return null;
   }
 }

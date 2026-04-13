@@ -34,11 +34,17 @@ export async function getNextInvoiceNumber() {
 
 export async function saveInvoice(data: InvoiceData) {
   if (!SPREADSHEET_ID) {
-    throw new Error("Google Sheet ID is not defined");
+    console.error("SAVE ERROR: GOOGLE_SHEET_LOGS_ID is not defined in environment variables.");
+    throw new Error("Configuración incompleta: Falta el ID de la hoja de cálculo (GOOGLE_SHEET_LOGS_ID).");
   }
 
   try {
     const sheetName = await getSheetName();
+    const client = getGoogleSheetsClient();
+    
+    if (!client) {
+      throw new Error("Error de autenticación: No se pudo conectar con Google Sheets. Revisa la variable GOOGLE_SERVICE_ACCOUNT_KEYS.");
+    }
     
     // Calculate totals on server to be sure
     const subtotal = data.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
@@ -76,13 +82,17 @@ export async function saveInvoice(data: InvoiceData) {
       range: result.updates?.updatedRange,
     };
   } catch (error: any) {
-    console.error("Error saving invoice:", error);
-    throw new Error(`Error al guardar en Google Sheets: ${error.message}`);
+    console.error("==== SAVE INVOICE CRITICAL ERROR ====");
+    console.error(error);
+    throw new Error(`Google Sheets Sync Error: ${error.message}`);
   }
 }
 
 export async function getHistory() {
-  if (!SPREADSHEET_ID) throw new Error("Google Sheet ID is not defined");
+  if (!SPREADSHEET_ID) {
+    console.warn("HISTORY ERROR: GOOGLE_SHEET_LOGS_ID is missing.");
+    return [];
+  }
 
   try {
     const sheetName = await getSheetName();
@@ -113,7 +123,7 @@ export async function getHistory() {
       terms: row[15],
     }));
   } catch (error) {
-    console.error("Error fetching history:", error);
+    console.error("HISTORY FETCH ERROR:", error);
     return [];
   }
 }
