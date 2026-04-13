@@ -66,14 +66,14 @@ export default function ControlPanel({
           <div className="flex flex-wrap lg:flex-nowrap items-end gap-2 w-full lg:w-auto">
             <div className="flex flex-col gap-1 w-full lg:w-48 shrink-0">
               <label className="text-[10px] uppercase font-bold text-slate-500">
-                Nombre del PDF
+                PDF Filename
               </label>
               <input
                 type="text"
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
                 className="h-11 px-3 rounded-full border border-slate-300 bg-white/80 backdrop-blur text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary w-full shadow-xs"
-                placeholder="Nombre archivo"
+                placeholder="Filename"
               />
             </div>
             
@@ -82,10 +82,10 @@ export default function ControlPanel({
               variant="outline"
               size="default"
               className="no-print h-11 px-4 grow lg:grow-0"
-              title="Ver Historial"
+              title="View History"
             >
               <History className="w-4 h-4 mr-2" />
-              <span>Facturas Pasadas</span>
+              <span>History</span>
             </Button>
 
             {!isLocked ? (
@@ -100,7 +100,7 @@ export default function ControlPanel({
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Guardar
+                Save
               </Button>
             ) : (
               <Button
@@ -109,7 +109,7 @@ export default function ControlPanel({
                 className="rounded-full bg-green-600 hover:bg-green-700 no-print h-11 shadow-md shadow-green-900/20 grow lg:grow-0"
               >
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Nueva Factura
+                New Invoice
               </Button>
             )}
 
@@ -123,7 +123,7 @@ export default function ControlPanel({
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              {isExporting ? "Generando..." : "Exportar PDF"}
+              {isExporting ? "Exporting..." : "Export PDF"}
             </Button>
           </div>
         </div>

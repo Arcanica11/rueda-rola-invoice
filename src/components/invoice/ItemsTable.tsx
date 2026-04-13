@@ -63,7 +63,7 @@ export default function ItemsTable({ items }: { items: InvoiceItem[] }) {
                 <td className="py-2 pl-2 font-medium text-slate-700 text-sm group-hover:text-primary transition-colors align-top">
                   {item.description || (
                     <span className="text-slate-300 italic">
-                      Nueva línea...
+                      New line...
                     </span>
                   )}
                 </td>

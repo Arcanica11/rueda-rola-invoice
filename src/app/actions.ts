@@ -4,10 +4,10 @@ import { appendRow, readSheet, getFirstSheetTitle } from "@/lib/google-sheets";
 import { InvoiceData } from "@/types/invoice";
 import { revalidatePath } from "next/cache";
 
-// User provided 1Q1VveJEsQLsxEYdEilBFFIlrZlattbknHdHUzPB808g as LOGS ID
+// SPREADSHEET_ID from env
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_LOGS_ID || "";
 
-// Helper to get the correct sheet name (Invoices, Sheet1, Hoja 1, etc.)
+// Helper to get the correct sheet name
 async function getSheetName() {
   const title = await getFirstSheetTitle(SPREADSHEET_ID);
   return title;
@@ -20,20 +20,14 @@ export async function getNextInvoiceNumber() {
 
   try {
     const sheetName = await getSheetName();
-    // Read Column A to get all invoice numbers
     const rows = await readSheet(SPREADSHEET_ID, `'${sheetName}'!A:A`);
-
-    // If only header or empty, start from 0
     const count = rows.length > 1 ? rows.length - 1 : 0;
-
     const nextNum = count + 1;
     const year = new Date().getFullYear();
     const formattedNumber = `INV-${year}-${nextNum.toString().padStart(3, "0")}`;
-
     return formattedNumber;
   } catch (error) {
     console.error("Error fetching next invoice number:", error);
-    // Fallback if sheet doesn't exist or other error
     return `INV-${new Date().getFullYear()}-001`;
   }
 }
@@ -46,9 +40,11 @@ export async function saveInvoice(data: InvoiceData) {
   try {
     const sheetName = await getSheetName();
     
-    // Calculate totals
+    // Calculate totals on server to be sure
     const subtotal = data.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-    const total = subtotal; // Adjust if taxes/discounts are added later
+    const taxRate = 0.0825; // Matching client side
+    const tax = subtotal * taxRate;
+    const total = subtotal + tax;
 
     const row = [
       data.number,                      // A: Factura #
@@ -63,19 +59,13 @@ export async function saveInvoice(data: InvoiceData) {
       subtotal,                         // J: Subtotal
       total,                            // K: Total
       data.status,                      // L: Estado
-      JSON.stringify(data.payments || data.abonos || []), // M: Abonos / Pagos (JSON)
+      JSON.stringify(data.payments || []), // M: Pagos (JSON)
       JSON.stringify(data.items),       // N: Ítems (JSON)
       data.notes || "",                 // O: Notas
       data.terms || "",                 // P: Términos
     ];
 
     const result = await appendRow(SPREADSHEET_ID, `'${sheetName}'!A:P`, row);
-
-    console.log("Invoice saved successfully:", {
-      spreadsheetId: SPREADSHEET_ID,
-      sheetName,
-      range: result.updates?.updatedRange,
-    });
 
     revalidatePath("/invoice");
 
@@ -85,8 +75,45 @@ export async function saveInvoice(data: InvoiceData) {
       sheetName,
       range: result.updates?.updatedRange,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error saving invoice:", error);
-    throw error;
+    throw new Error(`Error al guardar en Google Sheets: ${error.message}`);
+  }
+}
+
+export async function getHistory() {
+  if (!SPREADSHEET_ID) throw new Error("Google Sheet ID is not defined");
+
+  try {
+    const sheetName = await getSheetName();
+    const rows = await readSheet(SPREADSHEET_ID, `'${sheetName}'!A:P`);
+    
+    if (!rows || rows.length <= 1) return [];
+
+    // Skip header row
+    const dataRows = rows.slice(1);
+    
+    return dataRows.map((row: any[], index: number) => ({
+      id: `gs-${index}`,
+      invoice_number: row[0],
+      created_at: row[1],
+      due_at: row[2],
+      client_name: row[3],
+      client_company: row[4],
+      client_email: row[5],
+      client_phone: row[6],
+      client_address: row[7],
+      client_tax_id: row[8],
+      subtotal: Number(row[9]) || 0,
+      total_amount: Number(row[10]) || 0,
+      status: row[11],
+      payments: row[12], // JSON string
+      items: row[13],    // JSON string
+      notes: row[14],
+      terms: row[15],
+    }));
+  } catch (error) {
+    console.error("Error fetching history:", error);
+    return [];
   }
 }

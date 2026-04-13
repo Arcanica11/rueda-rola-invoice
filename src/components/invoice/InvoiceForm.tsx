@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2, FileText, User } from "lucide-react";
+import { Plus, Trash2, FileText, User, Hash } from "lucide-react";
 import { InvoiceData, InvoiceItem } from "@/types/invoice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ interface InvoiceFormProps {
     ) => void;
     addItem: () => void;
     removeItem: (id: string) => void;
+    setInvoiceNumber: (num: string) => void;
     setNotes: (notes: string) => void;
     setDate: (date: Date) => void;
     setDeposit: (amount: number) => void;
@@ -32,12 +33,36 @@ export default function InvoiceForm({
 }: InvoiceFormProps) {
   return (
     <div className="space-y-10 pb-20">
+      {/* Factura Identifier Section */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 text-primary font-bold">
+          <Hash className="w-4 h-4" />
+          <h3 className="uppercase tracking-wider text-xs">
+            Invoice Identifier
+          </h3>
+        </div>
+        <div className="p-6 rounded-xl border border-border bg-white shadow-sm">
+          <div className="grid gap-2 max-w-sm">
+            <Label className="text-xs font-bold uppercase text-slate-500">
+              Invoice No.
+            </Label>
+            <Input
+              value={data.number}
+              onChange={(e) => actions.setInvoiceNumber(e.target.value)}
+              placeholder="INV-2026-001"
+              className="h-11 text-lg font-mono font-bold text-primary"
+              disabled={isLocked}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Client Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-primary font-bold">
           <User className="w-4 h-4" />
           <h3 className="uppercase tracking-wider text-xs">
-            Datos del Cliente
+            Client Details
           </h3>
         </div>
         <div className="grid gap-6 p-6 rounded-xl border border-border bg-white shadow-sm">
@@ -45,12 +70,12 @@ export default function InvoiceForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Nombre del Cliente
+                Client Name
               </Label>
               <textarea
                 value={data.client.name}
                 onChange={(e) => actions.setClient("name", e.target.value)}
-                placeholder="Persona 1, Persona 2..."
+                placeholder="Person 1, Person 2..."
                 className="flex min-h-[44px] w-full rounded-md border border-input bg-background px-3 py-2 text-base font-medium ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
                 disabled={isLocked}
                 rows={2}
@@ -58,12 +83,12 @@ export default function InvoiceForm({
             </div>
             <div className="grid gap-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Empresa / Compañía
+                Company / Business
               </Label>
               <Input
                 value={data.client.company || ""}
                 onChange={(e) => actions.setClient("company", e.target.value)}
-                placeholder="Nombre de la empresa"
+                placeholder="Company name"
                 className="h-11 text-base"
                 disabled={isLocked}
               />
@@ -74,19 +99,19 @@ export default function InvoiceForm({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="grid gap-2 sm:col-span-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Dirección
+                Address
               </Label>
               <Input
                 value={data.client.address}
                 onChange={(e) => actions.setClient("address", e.target.value)}
-                placeholder="Calle Principal 123, Ciudad..."
+                placeholder="Main St 123, City..."
                 className="h-11 text-base"
                 disabled={isLocked}
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Teléfono
+                Phone
               </Label>
               <Input
                 value={data.client.phone || ""}
@@ -102,26 +127,25 @@ export default function InvoiceForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Email (Opcional)
+                Email (Optional)
               </Label>
               <Input
                 value={data.client.email}
                 onChange={(e) => actions.setClient("email", e.target.value)}
-                placeholder="cliente@ejemplo.com"
+                placeholder="client@example.com"
                 className="h-10 text-sm"
                 disabled={isLocked}
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-xs font-bold uppercase text-slate-500">
-                Fecha de Factura
+                Invoice Date
               </Label>
               <Input
                 type="date"
                 value={data.date.toISOString().split("T")[0]}
                 onChange={(e) => {
                   if (e.target.value) {
-                    // Convert yyyy-mm-dd to local Date without timezone shifting by using parts
                     const [year, month, day] = e.target.value.split('-').map(Number);
                     actions.setDate(new Date(year, month - 1, day));
                   }
@@ -140,7 +164,7 @@ export default function InvoiceForm({
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             <h3 className="uppercase tracking-wider text-xs">
-              Líneas de Servicio
+              Service Lines
             </h3>
           </div>
           <Button
@@ -150,7 +174,7 @@ export default function InvoiceForm({
             className="h-7 text-xs"
             disabled={isLocked}
           >
-            <Plus className="w-3 h-3 mr-1" /> Agregar Item
+            <Plus className="w-3 h-3 mr-1" /> Add Item
           </Button>
         </div>
 
@@ -166,21 +190,21 @@ export default function InvoiceForm({
               >
                 <div className="col-span-12 sm:col-span-6 space-y-1.5">
                   <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Descripción
+                    Description
                   </Label>
                   <Input
                     value={item.description}
                     onChange={(e) =>
                       actions.updateItem(item.id, "description", e.target.value)
                     }
-                    placeholder="Descripción del servicio"
+                    placeholder="Service description"
                     className="h-10 text-base"
                     disabled={isLocked}
                   />
                 </div>
                 <div className="col-span-4 sm:col-span-2 space-y-1.5">
                   <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Cant.
+                    Qty
                   </Label>
                   <Input
                     type="number"
@@ -198,7 +222,7 @@ export default function InvoiceForm({
                 </div>
                 <div className="col-span-8 sm:col-span-4 space-y-1.5 relative">
                   <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Precio
+                    Unit Price
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
@@ -220,7 +244,7 @@ export default function InvoiceForm({
                       className="h-10 w-10 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                       onClick={() => actions.removeItem(item.id)}
                       disabled={isLocked}
-                      title="Eliminar Item"
+                      title="Remove Line"
                     >
                       <Trash2 className="w-5 h-5" />
                     </Button>
@@ -237,7 +261,7 @@ export default function InvoiceForm({
         {/* Deposit */}
         <div className="grid gap-2 p-6 rounded-xl border border-border bg-white shadow-sm">
           <Label className="text-xs font-bold uppercase text-slate-500">
-            Depósito / Anticipo (Deposit Paid)
+            Deposit / Initial Payment
           </Label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
@@ -253,14 +277,14 @@ export default function InvoiceForm({
             />
           </div>
           <p className="text-[10px] text-slate-400">
-            Este monto se restará del total.
+            This amount will be subtracted from the total.
           </p>
         </div>
 
         {/* Notes */}
         <div className="grid gap-2">
           <Label className="text-xs font-bold uppercase text-slate-500">
-            Notas (Notes)
+            Notes / Terms
           </Label>
           <textarea
             value={data.notes || ""}

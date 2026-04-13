@@ -12,9 +12,9 @@ import Watermark from "@/components/invoice/Watermark";
 import ClientInfo from "@/components/invoice/ClientInfo";
 import ItemsTable from "@/components/invoice/ItemsTable";
 import InvoiceSummary from "@/components/invoice/InvoiceSummary";
-// import InvoiceHistory, { InvoiceRecord } from "@/components/invoice/InvoiceHistory";
+import InvoiceHistory from "@/components/invoice/InvoiceHistory";
 // Icons and Button removed as they are now in ControlPanel
-import { getNextInvoiceNumber, saveInvoice } from "@/app/actions";
+import { getNextInvoiceNumber, saveInvoice, getHistory } from "@/app/actions";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
@@ -50,21 +50,52 @@ export default function InvoicePage() {
     document.title = data.number ? `Factura ${data.number}` : "Nueva Factura";
   }, [data.number]);
 
+  const handleSaveInvoice = async (silent = false) => {
+    if (!data.client.name) {
+      if (!silent) toast.error("Nombre de cliente requerido");
+      return { success: false };
+    }
+    if (data.items.length === 0) {
+      if (!silent) toast.error("Agregue ítems a la factura");
+      return { success: false };
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await saveInvoice(data);
+      if (!silent) {
+        toast.success(`Guardado en Google Sheets: ${result.sheetName}`);
+      }
+      setIsLocked(true);
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error saving invoice:", error);
+      if (!silent) toast.error(error.message || "Error al guardar");
+      return { success: false };
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // -- PDF Export logic using html2canvas & jspdf --
   const handleExportPDF = async (customFileName: string) => {
+    // 1. Auto-save first
+    const saveResult = await handleSaveInvoice(true);
+    if (!saveResult.success) {
+      toast.error("No se pudo guardar la factura antes de exportar. Verifique los datos.");
+      return;
+    }
+
     setIsExporting(true);
+    const toastId = toast.loading("Generando PDF...");
+    
     try {
-      console.log("1. Verificando referencias del canvas...");
       if (!canvasRef.current) throw new Error("Canvas ref is null");
 
       const element = canvasRef.current;
-      console.log("2. Elemento encontrado:", element);
-
       const wrapper = element.parentElement;
       const originalTransform = wrapper ? wrapper.style.transform : "none";
       if (wrapper) wrapper.style.transform = "none";
-
-      console.log("3. Iniciando html2canvas con scale: 2...");
 
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -73,9 +104,8 @@ export default function InvoicePage() {
         allowTaint: true,
         backgroundColor: "#ffffff",
         imageTimeout: 15000,
-        logging: true,
+        logging: false,
         onclone: (clonedDoc: Document) => {
-          // Fallback for html2canvas unsupported color functions (tailwind v4 uses oklab/lab/oklch)
           const allElements = clonedDoc.querySelectorAll("*");
           allElements.forEach((el: Element) => {
             const style = window.getComputedStyle(el);
@@ -103,7 +133,6 @@ export default function InvoicePage() {
 
       const imgData = canvas.toDataURL("image/jpeg", 0.75);
 
-      // A4 size in mm
       const pdf = new jsPDF({
         orientation: "p",
         unit: "mm",
@@ -119,11 +148,9 @@ export default function InvoicePage() {
       let heightLeft = imgHeight;
       let position = 0;
 
-      console.log("6. Dibujando página inicial en PDF...");
       pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight);
       heightLeft -= pageHeight;
 
-      console.log("7. Verificando si requiere multipágina...");
       while (heightLeft > 0) {
         position -= pageHeight;
         pdf.addPage();
@@ -131,50 +158,18 @@ export default function InvoicePage() {
         heightLeft -= pageHeight;
       }
 
-      console.log("8. Nombrando el archivo...");
-
-      // Auto-save with custom or default name
       let finalFileName = customFileName || (data.number ? `Factura-${data.number}` : "Factura-RuedaRola");
       if (!finalFileName.toLowerCase().endsWith(".pdf")) {
         finalFileName += ".pdf";
       }
       
       pdf.save(finalFileName);
-
-      console.log("--- ¡PDF Generado y Guardado con Éxito! ---");
-      toast.success("PDF generado exitosamente");
+      toast.success("PDF generado y guardado en historial", { id: toastId });
     } catch (error: any) {
       console.error("==== ERROR GENERANDO PDF ====");
-      console.error("Mensaje de error:", error?.message);
-      console.error("Objeto error completo:", error);
-      toast.error("Error al exportar: " + (error?.message || "Revisar consola de navegador"));
+      toast.error("Error al exportar: " + (error?.message || "Revisar consola"), { id: toastId });
     } finally {
       setIsExporting(false);
-    }
-  };
-
-  const handleSaveInvoice = async () => {
-    if (!data.client.name) {
-      toast.error("Nombre de cliente requerido");
-      return;
-    }
-    if (data.items.length === 0) {
-      toast.error("Agregue items a la factura");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const result = await saveInvoice(data);
-      toast.success(
-        `Guardado en: ${result.sheetName} (${result.range}). ID: ...${result.spreadsheetId.slice(-4)}`,
-      );
-      setIsLocked(true);
-    } catch (error) {
-      console.error("Error saving invoice:", error);
-      toast.error("Error al guardar en Google Sheets");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -184,31 +179,54 @@ export default function InvoicePage() {
     await fetchNextInvoiceNumber();
   };
 
-  /* 
-  const loadInvoiceFromHistory = async (invoice: InvoiceRecord) => {
-    // History loading disabled during Google Sheets migration
-    // TODO: Implement getHistory action
-    toast.error("Historial no disponible en esta versión.");
-  }; 
-  */
+  const loadInvoiceFromHistory = (historyItem: any) => {
+    try {
+      const items = typeof historyItem.items === 'string' ? JSON.parse(historyItem.items) : historyItem.items;
+      const payments = typeof historyItem.payments === 'string' ? JSON.parse(historyItem.payments) : historyItem.payments;
+      
+      setData({
+        number: historyItem.invoice_number,
+        date: new Date(historyItem.created_at),
+        dueDate: historyItem.due_at ? new Date(historyItem.due_at) : new Date(),
+        status: historyItem.status || "pending",
+        client: {
+          name: historyItem.client_name,
+          company: historyItem.client_company,
+          email: historyItem.client_email,
+          phone: historyItem.client_phone,
+          address: historyItem.client_address,
+          taxId: historyItem.client_tax_id,
+        },
+        items: items || [],
+        payments: payments || [],
+        notes: historyItem.notes || "",
+        terms: historyItem.terms || "",
+      });
+      setIsLocked(false);
+      toast.success(`Factura ${historyItem.invoice_number} cargada`);
+    } catch (error) {
+      console.error("Error loading invoice:", error);
+      toast.error("Error al cargar los datos de la factura");
+    }
+  };
 
   return (
-    <SplitLayout
-      controlPanelContent={
-        <ControlPanel
-          data={data}
-          actions={actions}
-          isLocked={isLocked}
-          isSaving={isSaving}
-          isExporting={isExporting}
-          onSave={handleSaveInvoice}
-          onNew={handleNewInvoice}
-          onHistory={() => toast.info("Historial en mantenimiento")}
-          onPrint={handleExportPDF}
-        />
-      }
-      liveCanvasContent={
-        <>
+    <>
+      <SplitLayout
+        controlPanelContent={
+          <ControlPanel
+            data={data}
+            actions={actions}
+            isLocked={isLocked}
+            isSaving={isSaving}
+            isExporting={isExporting}
+            onSave={() => handleSaveInvoice()}
+            onNew={handleNewInvoice}
+            onHistory={() => setShowHistory(true)}
+            onPrint={handleExportPDF}
+          />
+        }
+        liveCanvasContent={
           <div className="flex justify-center p-8 min-h-full bg-slate-100/50 overflow-auto">
             {/* Scale Wrapper: Ensures A4 dimensions while scaling down if necessary on smaller screens */}
             <div
@@ -241,7 +259,7 @@ export default function InvoicePage() {
                           />
                         </div>
                         <p className="text-sm text-slate-600 font-medium">
-                          Métodos de pago: Antonieta Galvez Cel (817) 941-0733
+                          Payment Methods: MG Cel (817) 941-0733
                         </p>
                       </div>
 
@@ -256,7 +274,7 @@ export default function InvoicePage() {
                       {/* Left: Thank You & Notes */}
                       <div className="mb-0 max-w-sm">
                         <h4 className="font-black text-xl text-slate-900 mb-2 italic">
-                          Thank you for your Business
+                          Thank you for your business
                         </h4>
                         <div className="space-y-4">
                           <div>
@@ -273,7 +291,7 @@ export default function InvoicePage() {
 
                       {/* Right: Agency Info */}
                       <div className="text-right space-y-1 text-sm text-slate-600">
-                        <p className="font-bold text-slate-900 text-lg">Antonieta Galvez</p>
+                        <p className="font-bold text-slate-900 text-lg">MG</p>
                         <p>(512) 489-0417</p>
                         <p className="text-primary font-medium">
                           Antonieta@Ruedalarolamedia.com
@@ -291,8 +309,15 @@ export default function InvoicePage() {
               </div>
             </div>
           </div>
-        </>
-      }
-    />
+        }
+      />
+
+      {showHistory && (
+        <InvoiceHistory
+          onClose={() => setShowHistory(false)}
+          onSelectInvoice={loadInvoiceFromHistory}
+        />
+      )}
+    </>
   );
 }

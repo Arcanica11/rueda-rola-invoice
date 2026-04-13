@@ -19,7 +19,7 @@ export async function loginUser(prevState: any, formData: FormData) {
   if (VALID_USERS[userKey] && VALID_USERS[userKey] === password) {
     // Generate simple token payload (In a real app this would be a signed JWT)
     const sessionPayload = Buffer.from(JSON.stringify({ user: userKey, ts: Date.now() })).toString("base64");
-    
+
     // Set secure cookie
     const cookieStore = await cookies();
     cookieStore.set("auth_session", sessionPayload, {

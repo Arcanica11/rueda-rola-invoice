@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { X, Loader2, FileText } from "lucide-react";
+import { X, Loader2, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getHistory } from "@/app/actions";
 
 export interface InvoiceRecord {
   id: string;
@@ -15,29 +15,27 @@ export interface InvoiceRecord {
   total_amount: number;
   created_at: string;
   status: string;
+  // Extra fields for loading back into editor
+  items?: string;
+  payments?: string;
 }
 
 interface InvoiceHistoryProps {
   onClose: () => void;
-  onSelectInvoice: (invoice: InvoiceRecord) => void;
+  onSelectInvoice: (invoice: any) => void;
 }
 
 export default function InvoiceHistory({
   onClose,
   onSelectInvoice,
 }: InvoiceHistoryProps) {
-  const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const { data, error } = await supabase
-          .from("invoices")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
+        const data = await getHistory();
         setInvoices(data || []);
       } catch (error) {
         console.error("Error fetching history:", error);
@@ -57,6 +55,7 @@ export default function InvoiceHistory({
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("es-MX", {
       year: "numeric",
       month: "short",
@@ -66,12 +65,12 @@ export default function InvoiceHistory({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm print:hidden">
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-5xl bg-white rounded-lg shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <FileText className="w-6 h-6 text-primary" />
-            Historial de Facturas
+            Invoice History (Google Sheets)
           </h2>
           <Button
             variant="ghost"
@@ -91,19 +90,19 @@ export default function InvoiceHistory({
             </div>
           ) : invoices.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
-              No hay facturas guardadas aún.
+              No invoices saved on Google Sheets yet.
             </div>
           ) : (
-            <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3"># Factura</th>
-                    <th className="px-4 py-3">Cliente</th>
-                    <th className="px-4 py-3">Fecha</th>
+                    <th className="px-4 py-3">Invoice #</th>
+                    <th className="px-4 py-3">Client</th>
+                    <th className="px-4 py-3">Date</th>
                     <th className="px-4 py-3 text-right">Total</th>
-                    <th className="px-4 py-3 text-center">Estado</th>
-                    <th className="px-4 py-3 text-center">Acciones</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -117,6 +116,11 @@ export default function InvoiceHistory({
                       </td>
                       <td className="px-4 py-3 text-slate-600">
                         {inv.client_name}
+                        {inv.client_company && (
+                          <span className="block text-[10px] text-slate-400 uppercase">
+                            {inv.client_company}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-slate-500">
                         {formatDate(inv.created_at)}
@@ -125,11 +129,13 @@ export default function InvoiceHistory({
                         {formatCurrency(inv.total_amount)}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          {inv.status || "Guardada"}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          inv.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {inv.status || "Saved"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-right">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -139,8 +145,8 @@ export default function InvoiceHistory({
                           }}
                           className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                         >
-                          <FileText className="w-4 h-4 mr-2" />
-                          Ver/Imprimir
+                          <Download className="w-4 h-4 mr-2" />
+                          Load in Editor
                         </Button>
                       </td>
                     </tr>
@@ -154,7 +160,7 @@ export default function InvoiceHistory({
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-white flex justify-end">
           <Button onClick={onClose} variant="outline">
-            Cerrar
+            Close
           </Button>
         </div>
       </div>
