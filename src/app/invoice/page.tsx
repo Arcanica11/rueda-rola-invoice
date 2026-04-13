@@ -244,20 +244,23 @@ export default function InvoicePage() {
                 <ClientInfo client={data.client} />
                 <ItemsTable items={data.items} />
                 <div className="flex-1" />
-                <div className="invoice-footer invoice-break-avoid mt-12">
-                  <div className="mb-4">
+                <div className="invoice-footer invoice-break-avoid mt-6">
+                  <div className="mb-2">
                     <div className="flex items-end justify-between">
                       <div className="space-y-2">
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-center gap-2">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src="/imagenes/qr_contacto.png"
                             alt="QR Contacto"
-                            className="w-24 h-24 object-contain"
+                            className="w-20 h-20 object-contain"
                             onError={(e) =>
                               (e.currentTarget.style.display = "none")
                             }
                           />
+                          <p className="text-[9px] font-black text-slate-800 uppercase tracking-tighter">
+                            Scan to view payment methods
+                          </p>
                         </div>
                       </div>
 
@@ -267,19 +270,19 @@ export default function InvoicePage() {
                       />
                     </div>
                   </div>
-                  <div className="mt-12 pt-8 border-t-2 border-slate-900">
+                  <div className="mt-8 pt-4 border-t-2 border-slate-900">
                     <div className="flex flex-row justify-between items-end">
                       {/* Left: Thank You & Notes */}
                       <div className="mb-0 max-w-sm">
-                        <h4 className="font-black text-xl text-slate-900 mb-2 italic">
+                        <h4 className="font-black text-lg text-slate-900 mb-1 italic">
                           Thank you for your business
                         </h4>
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                           <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
                               NOTES
                             </p>
-                            <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded border border-slate-100 min-h-[60px]">
+                            <div className="text-[11px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 min-h-[40px]">
                               {data.notes ||
                                 "Payment due as specified in terms."}
                             </div>
@@ -288,8 +291,8 @@ export default function InvoicePage() {
                       </div>
 
                       {/* Right: Agency Info */}
-                      <div className="text-right space-y-1 text-sm text-slate-600">
-                        <p className="font-bold text-slate-900 text-lg">MG</p>
+                      <div className="text-right space-y-0.5 text-[11px] text-slate-600">
+                        <p className="font-bold text-slate-900 text-base">MG</p>
                         <p>(512) 489-0417</p>
                         <p className="text-primary font-medium">
                           Antonieta@Ruedalarolamedia.com

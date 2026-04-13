@@ -6,61 +6,62 @@ export default function ClientInfo({
   client: InvoiceData["client"];
 }) {
   return (
-    <div className="mb-6 relative z-10 w-full">
-      <div className="bg-slate-50/50 rounded-xl p-5 border border-slate-100 shadow-sm">
-        <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 border-b border-slate-200/60 pb-2">
+    <div className="mb-4 relative z-10 w-full">
+      <div className="bg-slate-50/40 rounded-lg p-3 border border-slate-100 shadow-sm">
+        <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 border-b border-slate-200/40 pb-1">
           Client Information
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-y-6 gap-x-8">
-          {/* Main Info: Name & Company */}
-          <div className="md:col-span-5 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
+          {/* Column 1: Name & Company */}
+          <div className="space-y-2">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
                 Client Name
               </label>
-              <p className="text-slate-900 font-bold text-base leading-tight whitespace-pre-wrap">
+              <p className="text-slate-900 font-bold text-sm leading-tight whitespace-pre-wrap">
                 {client.name || "N/A"}
               </p>
             </div>
             {client.company && (
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                  Company / Business
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+                  Company
                 </label>
-                <p className="text-slate-800 font-bold text-sm whitespace-pre-wrap">
+                <p className="text-slate-800 font-bold text-[13px] leading-tight whitespace-pre-wrap">
                   {client.company}
                 </p>
               </div>
             )}
           </div>
 
-          {/* Contact Info: Address, Phone, Email */}
-          <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Address occupies full width of this sub-grid if possible */}
-            <div className="sm:col-span-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                Address
-              </label>
-              <p className="text-slate-800 font-bold text-sm whitespace-pre-wrap">
-                {client.address || "-"}
-              </p>
-            </div>
-            
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                Phone
-              </label>
-              <p className="text-slate-800 font-bold font-mono text-sm">
-                {client.phone || "-"}
-              </p>
-            </div>
+          {/* Column 2: Address */}
+          <div className="md:col-span-1">
+            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+              Address
+            </label>
+            <p className="text-slate-800 font-bold text-[13px] leading-tight whitespace-pre-wrap">
+              {client.address || "-"}
+            </p>
+          </div>
 
+          {/* Column 3: Contact */}
+          <div className="space-y-2">
+            {client.phone && (
+              <div>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+                  Phone
+                </label>
+                <p className="text-slate-800 font-bold font-mono text-[13px] leading-none">
+                  {client.phone}
+                </p>
+              </div>
+            )}
             {client.email && (
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
                   Email
                 </label>
-                <p className="text-slate-800 font-bold text-sm break-all">
+                <p className="text-slate-800 font-bold text-[13px] leading-none break-all">
                   {client.email}
                 </p>
               </div>
