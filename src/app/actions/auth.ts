@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 const VALID_USERS: Record<string, string> = {
   antonieta: "Rueda2026@",
   ivan: "Mima020233",
+  "ruedalarola.facturas@gmail.com": "RuedaFacturas2026?.",
 };
 
 export async function loginUser(prevState: any, formData: FormData) {
