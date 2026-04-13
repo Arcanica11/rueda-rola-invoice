@@ -12,29 +12,49 @@ function getGoogleSheetsClient() {
 
     if (rawKeys) {
       try {
-        // Handle case where env var might have escaped quotes
+        // 1. Remove any outer quotes that Vercel or local .env might have added
         const sanitizedKeys = rawKeys.trim().replace(/^['"]|['"]$/g, '');
         credentials = JSON.parse(sanitizedKeys);
         
         if (credentials.private_key) {
-          // Fix for Vercel/Node 17+ private key formatting
-          // Replaces both double-escaped (\\n) and literal \n if they survived JSON.parse incorrectly
-          credentials.private_key = credentials.private_key
-            .replace(/\\n/g, '\n')
-            .replace(/\n/g, '\n'); // Ensure actual newlines are preserved
+          // 2. Ultra-robust newline normalization
+          // Handles: literal \n strings, double-escaped \\n, and actual encoded newlines
+          const normalizedKey = credentials.private_key
+            .replace(/\\n/g, '\n')      // Convert literal \n to actual newline
+            .replace(/\n\n/g, '\n')    // Remove double newlines if any
+            .trim();
+
+          credentials.private_key = normalizedKey;
+
+          // 3. SAFE DIAGNOSTIC LOG (Masked)
+          // This helps verify if the key starts and ends correctly without leaking it
+          const keyCheck = normalizedKey.trim();
+          const startsWithHeader = keyCheck.startsWith("-----BEGIN PRIVATE KEY-----");
+          const endsWithFooter = keyCheck.endsWith("-----END PRIVATE KEY-----");
           
-          // Debug check (hidden from user)
-          if (!credentials.private_key.includes("-----BEGIN PRIVATE KEY-----")) {
-            console.error("GOOGLE AUTH ERROR: private_key does not contain expected header.");
+          console.log("==== GOOGLE AUTH DIAGNOSTIC ====");
+          console.log(`Key length: ${keyCheck.length} chars`);
+          console.log(`Header OK: ${startsWithHeader}`);
+          console.log(`Footer OK: ${endsWithFooter}`);
+          console.log("================================");
+
+          if (!startsWithHeader || !endsWithFooter) {
+            console.error("CRITICAL: The private key is missing the standard PEM header/footer.");
           }
         }
       } catch (e: any) {
         console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
+        console.error("Raw Keys Start (debug):", rawKeys.substring(0, 20) + "...");
       }
     }
     
+    // Explicitly pass credentials with cleaned private key
     auth = new google.auth.GoogleAuth({
-      credentials,
+      credentials: credentials ? {
+        client_email: credentials.client_email,
+        private_key: credentials.private_key,
+        project_id: credentials.project_id
+      } : undefined,
       keyFile: !credentials && !rawKeys ? "service-account.json" : undefined,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
