@@ -2,17 +2,19 @@ import { google } from "googleapis";
 
 let credentials;
 try {
-  credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
-    ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEYS)
-    : undefined;
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_KEYS) {
+    credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEYS);
+    // Fix for Vercel/Node 17+ private key formatting
+    if (credentials.private_key) {
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    }
+  }
 } catch (e) {
   console.error("CRITICAL ERROR: GOOGLE_SERVICE_ACCOUNT_KEYS is not a valid JSON string.");
-  console.error("Check for trailing commas, escaped characters, or hidden newlines.");
   credentials = undefined;
 }
 
 // Authenticate with Service Account
-// Supports both local file (dev) and Env Var (prod/Vercel)
 const auth = new google.auth.GoogleAuth({
   credentials,
   keyFile: !credentials && !process.env.GOOGLE_SERVICE_ACCOUNT_KEYS
