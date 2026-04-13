@@ -45,24 +45,31 @@ export async function saveInvoice(data: InvoiceData) {
 
   try {
     const sheetName = await getSheetName();
+    
+    // Calculate totals
+    const subtotal = data.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const total = subtotal; // Adjust if taxes/discounts are added later
+
     const row = [
-      data.number,
-      new Date().toISOString(),
-      data.client.name,
-      data.client.email || "",
-      data.client.address || "",
-      data.client.taxId || "",
-      // Money values
-      // Note: We need to recalculate or trust frontend.
-      // ideally we should recalculate, but for now specific to storage:
-      // We will store just the JSON items string in the last column
-      JSON.stringify(data.items), // Items
-      data.notes || "",
-      data.terms || "",
-      data.status,
+      data.number,                      // A: Factura #
+      new Date().toISOString(),         // B: Fecha Emisión
+      data.dueDate ? new Date(data.dueDate).toISOString() : "", // C: Fecha Vencimiento
+      data.client.name,                 // D: Cliente
+      data.client.company || "",        // E: Empresa
+      data.client.email || "",          // F: Email
+      data.client.phone || "",          // G: Teléfono
+      data.client.address || "",        // H: Dirección
+      data.client.taxId || "",          // I: Tax ID / NIT
+      subtotal,                         // J: Subtotal
+      total,                            // K: Total
+      data.status,                      // L: Estado
+      JSON.stringify(data.payments || data.abonos || []), // M: Abonos / Pagos (JSON)
+      JSON.stringify(data.items),       // N: Ítems (JSON)
+      data.notes || "",                 // O: Notas
+      data.terms || "",                 // P: Términos
     ];
 
-    const result = await appendRow(SPREADSHEET_ID, `'${sheetName}'!A:J`, row);
+    const result = await appendRow(SPREADSHEET_ID, `'${sheetName}'!A:P`, row);
 
     console.log("Invoice saved successfully:", {
       spreadsheetId: SPREADSHEET_ID,
