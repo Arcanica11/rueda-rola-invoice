@@ -1,31 +1,50 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  let response = NextResponse.next({ request });
 
-  // Protect /invoice route
-  if (pathname.startsWith("/invoice")) {
-    const sessionCookie = request.cookies.get("auth_session");
-
-    if (!sessionCookie || !sessionCookie.value) {
-      // Not authenticated -> send to login
-      const loginUrl = new URL("/login", request.url);
-      return NextResponse.redirect(loginUrl);
+  // Build Supabase client for middleware
+  const supabase = createServerClient(
+    process.env.SUPABASE_INVOICE_URL!,
+    process.env.SUPABASE_INVOICE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
     }
-    // Simple verification (in large scale, decode JWT here)
-    // For this simple hardcoded usage, the existence of our own cookie is enough 
-    // because we strictly set it in the Server Action upon verification.
+  );
+
+  // Refresh session if expired
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protect /invoice routes
+  if (pathname.startsWith("/invoice") && !user) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect root path to /invoice directly 
-  // User wants a clean workflow, but we have a landing page on `/`. 
-  // We'll leave the landing page as it is.
+  // If already logged in, redirect away from /login
+  if (pathname === "/login" && user) {
+    return NextResponse.redirect(new URL("/invoice", request.url));
+  }
 
-  return NextResponse.next();
+  return response;
 }
 
-// Config to apply middleware ONLY to relevant routes to save edge computing
 export const config = {
-  matcher: ["/invoice/:path*"],
+  matcher: ["/invoice/:path*", "/login"],
 };

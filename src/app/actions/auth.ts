@@ -1,43 +1,57 @@
 "use server";
 
-import { cookies } from "next/headers";
-
-// In-memory verification mapping mapping username lowercased to their strict password
-const VALID_USERS: Record<string, string> = {
-  antonieta: "Rueda2026@",
-  ivan: "Mima020233",
-  "ruedalarola.facturas@gmail.com": "RuedaFacturas2026?.",
-};
+import { createAuthClient } from "@/lib/supabase-auth";
+import { redirect } from "next/navigation";
 
 export async function loginUser(prevState: any, formData: FormData) {
-  const username = formData.get("username")?.toString() || "";
+  const email = formData.get("username")?.toString() || "";
   const password = formData.get("password")?.toString() || "";
 
-  const userKey = username.toLowerCase().trim();
+  const supabase = await createAuthClient();
 
-  // Validate existence and password
-  if (VALID_USERS[userKey] && VALID_USERS[userKey] === password) {
-    // Generate simple token payload (In a real app this would be a signed JWT)
-    const sessionPayload = Buffer.from(JSON.stringify({ user: userKey, ts: Date.now() })).toString("base64");
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    // Set secure cookie
-    const cookieStore = await cookies();
-    cookieStore.set("auth_session", sessionPayload, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
-
-    return { success: true };
+  if (error) {
+    return { success: false, error: "Email o contraseña incorrectos." };
   }
 
-  return { success: false, error: "Usuario o contraseña incorrectos" };
+  return { success: true };
 }
 
 export async function logoutUser() {
-  const cookieStore = await cookies();
-  cookieStore.delete("auth_session");
-  return { success: true };
+  const supabase = await createAuthClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
+
+export async function changePassword(prevState: any, formData: FormData) {
+  const newPassword = formData.get("newPassword")?.toString() || "";
+  const confirmPassword = formData.get("confirmPassword")?.toString() || "";
+
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "La contraseña debe tener al menos 8 caracteres." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { success: false, error: "Las contraseñas no coinciden." };
+  }
+
+  const supabase = await createAuthClient();
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+  if (error) {
+    return { success: false, error: `Error: ${error.message}` };
+  }
+
+  return { success: true, message: "Contraseña actualizada exitosamente." };
+}
+
+export async function getSessionUser() {
+  const supabase = await createAuthClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
 }

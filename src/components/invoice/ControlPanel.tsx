@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Save, Loader2, PlusCircle, Download, History, LogOut } from "lucide-react";
 import InvoiceForm from "./InvoiceForm";
 import { logoutUser } from "@/app/actions/auth";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 // Infiero el tipo de 'actions' directamente del hook
 type InvoiceActions = ReturnType<typeof useInvoice>["actions"];
@@ -132,8 +133,9 @@ export default function ControlPanel({
         <InvoiceForm data={data} actions={actions} isLocked={isLocked} />
 
         {/* Footer info */}
-        <div className="text-xs text-center text-muted-foreground mt-4 pb-4 opacity-50">
-          Design System v2026.1 • Rueda La Rola Media
+        <div className="text-xs text-center text-muted-foreground mt-4 pb-4 opacity-50 flex items-center justify-center gap-4">
+          <span>Design System v2026.1 • Rueda La Rola Media</span>
+          <ChangePasswordModal />
         </div>
       </div>
     </div>
