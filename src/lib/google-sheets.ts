@@ -8,42 +8,52 @@ export function getGoogleSheetsClient() {
   if (sheets) return sheets;
 
   try {
-    const rawKeys = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS;
+    let credentials: any = null;
+
+    // PRIORITY 1: Individual env vars (most reliable in Vercel)
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
-    let credentials;
-    let tempFilePath = "";
-
-    // 1. Try individual variables (Safest/Newest)
     if (clientEmail && privateKey) {
       credentials = {
         type: "service_account",
         client_email: clientEmail,
         private_key: privateKey.replace(/\\n/g, '\n'),
       };
-    } 
-    // 2. Try the big JSON variable (Legacy)
-    else if (rawKeys) {
-      try {
-        let jsonString = rawKeys.trim().replace(/^['"]|['"]$/g, '');
-        if (!jsonString.startsWith('{') && (jsonString.startsWith('ewog') || !jsonString.includes(' '))) {
-          jsonString = Buffer.from(jsonString, 'base64').toString('utf8');
+      console.log("Auth: Using individual env vars.");
+    }
+
+    // PRIORITY 2: Big JSON env var (legacy, Base64 or raw JSON)
+    if (!credentials) {
+      const rawKeys = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS;
+      if (rawKeys) {
+        const trimmed = rawKeys.trim().replace(/^['"]|['"]$/g, '');
+        // Only attempt JSON parse if it looks like JSON or Base64 — never PEM
+        if (trimmed.startsWith('{') || trimmed.startsWith('ewog')) {
+          try {
+            const jsonString = trimmed.startsWith('{')
+              ? trimmed
+              : Buffer.from(trimmed, 'base64').toString('utf8');
+            credentials = JSON.parse(jsonString);
+            if (credentials?.private_key) {
+              credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+            }
+            console.log("Auth: Using GOOGLE_SERVICE_ACCOUNT_KEYS.");
+          } catch (e: any) {
+            console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
+          }
+        } else {
+          console.warn("Auth: GOOGLE_SERVICE_ACCOUNT_KEYS is not JSON/Base64 — skipping.");
         }
-        credentials = JSON.parse(jsonString);
-        if (credentials.private_key) {
-          credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-        }
-      } catch (e: any) {
-        console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
       }
     }
 
-    // 3. Fallback/Local File
+    // PRIORITY 3: Local file fallback (dev only)
     if (!credentials) {
       const keyPath = path.join(process.cwd(), 'service-account.json');
       if (fs.existsSync(keyPath)) {
         credentials = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+        console.log("Auth: Using local service-account.json.");
       }
     }
 
@@ -52,21 +62,18 @@ export function getGoogleSheetsClient() {
       return null;
     }
 
-    // 4. EMULATE FILE IN PRODUCTION (Double protection)
-    // Writing to /tmp ensures the library uses its most robust file-path-based logic.
+    // Write to /tmp for Vercel (most robust path for GoogleAuth)
+    let keyFile: string | undefined;
     try {
-      const tmpDir = '/tmp';
-      if (fs.existsSync(tmpDir)) {
-        tempFilePath = path.join(tmpDir, `google-auth-${Date.now()}.json`);
-        fs.writeFileSync(tempFilePath, JSON.stringify(credentials));
+      if (fs.existsSync('/tmp')) {
+        keyFile = path.join('/tmp', `gsa-${Date.now()}.json`);
+        fs.writeFileSync(keyFile, JSON.stringify(credentials));
       }
-    } catch (e) {
-      // Possible in some local environments without /tmp
-    }
+    } catch (_) { /* ignore */ }
 
     const auth = new google.auth.GoogleAuth({
-      keyFile: tempFilePath || undefined,
-      credentials: tempFilePath ? undefined : credentials,
+      keyFile: keyFile || undefined,
+      credentials: keyFile ? undefined : credentials,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
