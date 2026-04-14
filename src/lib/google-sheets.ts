@@ -48,13 +48,21 @@ export function getGoogleSheetsClient() {
       return null;
     }
 
-    // Ultra-clean the private key for OpenSSL compatibility
     const cleanKey = credentials.private_key
-      .replace(/\\n/g, '\n')
-      .split('\n')
-      .map((line: string) => line.trim())
-      .filter((line: string) => line.length > 0)
-      .join('\n');
+      .replace(/\\n/g, '\n')     // Handle escaped newlines
+      .replace(/\r/g, '')        // Remove carriage returns
+      .trim();
+
+    // SAFE PRODUCTION DIAGNOSTIC
+    if (process.env.NODE_ENV === 'production' || rawKeys) {
+      const firstPart = cleanKey.substring(0, 30);
+      const lastPart = cleanKey.substring(cleanKey.length - 30);
+      console.log("==== FINAL KEY DIAGNOSTIC ====");
+      console.log(`Key length: ${cleanKey.length}`);
+      console.log(`Key start: ${firstPart}...`);
+      console.log(`Key end: ...${lastPart}`);
+      console.log("==============================");
+    }
 
     const jwtClient = new google.auth.JWT({
       email: credentials.client_email,
