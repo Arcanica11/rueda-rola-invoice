@@ -77,12 +77,6 @@ export function getGoogleSheetsClient() {
     return null;
   }
 }
-    return sheets;
-  } catch (e) {
-    console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
-    return null;
-  }
-}
 
 /**
  * Appends a row to the specified sheet.
