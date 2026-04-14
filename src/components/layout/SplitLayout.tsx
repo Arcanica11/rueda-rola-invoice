@@ -45,7 +45,7 @@ export default function SplitLayout({
 
       {/* Left Panel - Control Panel Content */}
       <div
-        className={`${activeTab === "edit" ? "block" : "hidden"} lg:block w-full lg:w-[45%] xl:w-[40%] h-full overflow-y-auto border-r border-slate-200 shadow-xl z-20`}
+        className={`${activeTab === "edit" ? "block" : "hidden"} lg:block w-full lg:w-[45%] xl:w-[40%] h-full overflow-y-auto overflow-x-hidden border-r border-slate-200 shadow-xl z-20`}
       >
         {controlPanelContent}
       </div>

@@ -15,14 +15,15 @@ export default function ChangePasswordModal() {
   return (
     <>
       {/* Trigger Button */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-800 transition-colors px-2 py-1 rounded hover:bg-slate-100"
-        title="Change Password"
+        className="text-slate-400 hover:text-slate-800 hover:bg-slate-100"
+        title="Perfil y Contraseña"
       >
-        <KeyRound size={13} />
-        <span>Change Password</span>
-      </button>
+        <KeyRound className="w-5 h-5" />
+      </Button>
 
       {/* Modal Overlay */}
       {isOpen && (

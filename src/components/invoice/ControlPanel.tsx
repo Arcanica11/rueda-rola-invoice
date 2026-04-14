@@ -49,23 +49,27 @@ export default function ControlPanel({
 
   return (
     <div className="w-full h-full lg:overflow-visible bg-background/80 backdrop-blur-xl p-6 lg:p-10 pb-28 lg:pb-10 print:hidden no-print form-container relative">
-      <Button 
-        onClick={handleLogout}
-        variant="ghost" 
-        size="icon" 
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 text-slate-400 hover:text-red-500 hover:bg-red-50"
-        title="Cerrar Sesión"
-      >
-        <LogOut className="w-5 h-5" />
-      </Button>
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 z-50">
+        <ChangePasswordModal />
+        <Button 
+          onClick={handleLogout}
+          variant="ghost" 
+          size="icon" 
+          className="text-slate-400 hover:text-red-500 hover:bg-red-50"
+          title="Cerrar Sesión"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
+      </div>
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header & Buttons */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 print:hidden z-50 relative">
+        <div className="flex flex-col mb-8 gap-4 print:hidden z-50 relative mt-8 sm:mt-0">
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-purple-400 shrink-0">
             Rueda Rola Invoice
           </h1>
-          <div className="flex flex-wrap lg:flex-nowrap items-end gap-2 w-full lg:w-auto">
-            <div className="flex flex-col gap-1 w-full lg:w-48 shrink-0">
+          
+          <div className="flex flex-wrap items-end gap-3 w-full">
+            <div className="flex flex-col gap-1 w-full sm:flex-1 min-w-[200px]">
               <label className="text-[10px] uppercase font-bold text-slate-500">
                 PDF Filename
               </label>
@@ -82,7 +86,7 @@ export default function ControlPanel({
               onClick={onHistory}
               variant="outline"
               size="default"
-              className="no-print h-11 px-4 grow lg:grow-0"
+              className="no-print h-11 px-4 flex-1 sm:flex-none"
               title="View History"
             >
               <History className="w-4 h-4 mr-2" />
@@ -94,7 +98,7 @@ export default function ControlPanel({
                 onClick={onSave}
                 disabled={isSaving}
                 variant="outline"
-                className="rounded-full no-print h-11 grow lg:grow-0"
+                className="rounded-full no-print h-11 flex-1 sm:flex-none px-6"
               >
                 {isSaving ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -107,7 +111,7 @@ export default function ControlPanel({
               <Button
                 onClick={onNew}
                 variant="default"
-                className="rounded-full bg-green-600 hover:bg-green-700 no-print h-11 shadow-md shadow-green-900/20 grow lg:grow-0"
+                className="rounded-full bg-green-600 hover:bg-green-700 no-print h-11 shadow-md shadow-green-900/20 flex-1 sm:flex-none px-6"
               >
                 <PlusCircle className="w-4 h-4 mr-2" />
                 New Invoice
@@ -117,7 +121,7 @@ export default function ControlPanel({
             <Button
               onClick={() => onPrint(fileName)}
               disabled={isExporting}
-              className="rounded-full shadow-lg shadow-primary/25 no-print h-11 grow lg:grow-0"
+              className="rounded-full shadow-lg shadow-primary/25 no-print h-11 flex-1 sm:flex-none px-6"
             >
               {isExporting ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -135,7 +139,6 @@ export default function ControlPanel({
         {/* Footer info */}
         <div className="text-xs text-center text-muted-foreground mt-4 pb-4 opacity-50 flex items-center justify-center gap-4">
           <span>Design System v2026.1 • Rueda La Rola Media</span>
-          <ChangePasswordModal />
         </div>
       </div>
     </div>
