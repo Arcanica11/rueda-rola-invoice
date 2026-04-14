@@ -56,12 +56,11 @@ export function getGoogleSheetsClient() {
       .filter((line: string) => line.length > 0)
       .join('\n');
 
-    const jwtClient = new google.auth.JWT(
-      credentials.client_email,
-      undefined,
-      cleanKey,
-      ['https://www.googleapis.com/auth/spreadsheets']
-    );
+    const jwtClient = new google.auth.JWT({
+      email: credentials.client_email,
+      key: cleanKey,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
 
     sheets = google.sheets({ version: "v4", auth: jwtClient });
     return sheets;
