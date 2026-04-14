@@ -13,8 +13,7 @@ async function testConnection() {
     }
 
     const credentials = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    console.log("Credentials file loaded successfully.");
-    console.log("Client Email:", credentials.client_email);
+    console.log("Raw Key Start:", credentials.private_key ? credentials.private_key.substring(0, 30) : "MISSING");
 
     // Clean key the same way the app does
     const cleanKey = credentials.private_key
@@ -23,6 +22,9 @@ async function testConnection() {
       .map(line => line.trim())
       .filter(line => line.length > 0)
       .join('\n');
+
+    console.log("Clean Key Length:", cleanKey.length);
+    console.log("Clean Key Start:", cleanKey.substring(0, 30));
 
     const jwtClient = new google.auth.JWT(
       credentials.client_email,

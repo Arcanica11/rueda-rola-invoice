@@ -1,6 +1,5 @@
 import { google } from "googleapis";
 
-let auth: any = null;
 let sheets: any = null;
 
 export function getGoogleSheetsClient() {
@@ -8,53 +7,33 @@ export function getGoogleSheetsClient() {
 
   try {
     const rawKeys = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS;
-    let credentials;
+    let authOptions: any = {
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    };
 
     if (rawKeys) {
       try {
         const sanitizedKeys = rawKeys.trim().replace(/^['"]|['"]$/g, '');
-        credentials = JSON.parse(sanitizedKeys);
+        const credentials = JSON.parse(sanitizedKeys);
+        if (credentials.private_key) {
+          credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+        }
+        authOptions.credentials = credentials;
       } catch (e: any) {
         console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
       }
-    }
-
-    // Fallback to local file if no env var
-    if (!credentials) {
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const filePath = path.join(process.cwd(), 'service-account.json');
-        if (fs.existsSync(filePath)) {
-          credentials = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        }
-      } catch (e) {
-        console.error("Local service-account.json not found or unreadable.");
+    } else {
+      // Local development fallback
+      const fs = require('fs');
+      const path = require('path');
+      const keyPath = path.join(process.cwd(), 'service-account.json');
+      if (fs.existsSync(keyPath)) {
+        authOptions.keyFile = keyPath;
       }
     }
 
-    if (!credentials || !credentials.private_key || !credentials.client_email) {
-      console.error("GOOGLE AUTH ERROR: Missing vital credentials (email or private_key)");
-      return null;
-    }
-
-    // Ultra-clean the private key
-    const cleanKey = credentials.private_key
-      .replace(/\\n/g, '\n')
-      .split('\n')
-      .map((line: string) => line.trim())
-      .filter((line: string) => line.length > 0)
-      .join('\n');
-
-    // Use JWT directly for more predictable signing
-    const jwtClient = new google.auth.JWT(
-      credentials.client_email,
-      undefined,
-      cleanKey,
-      ['https://www.googleapis.com/auth/spreadsheets']
-    );
-
-    sheets = google.sheets({ version: "v4", auth: jwtClient });
+    const auth = new google.auth.GoogleAuth(authOptions);
+    sheets = google.sheets({ version: "v4", auth });
     return sheets;
   } catch (e) {
     console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
