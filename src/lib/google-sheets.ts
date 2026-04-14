@@ -1,4 +1,6 @@
 import { google } from "googleapis";
+import fs from "fs";
+import path from "path";
 
 let sheets: any = null;
 
@@ -7,54 +9,74 @@ export function getGoogleSheetsClient() {
 
   try {
     const rawKeys = process.env.GOOGLE_SERVICE_ACCOUNT_KEYS;
-    let credentials;
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
-    if (rawKeys) {
+    let credentials;
+    let tempFilePath = "";
+
+    // 1. Try individual variables (Safest/Newest)
+    if (clientEmail && privateKey) {
+      credentials = {
+        type: "service_account",
+        client_email: clientEmail,
+        private_key: privateKey.replace(/\\n/g, '\n'),
+      };
+    } 
+    // 2. Try the big JSON variable (Legacy)
+    else if (rawKeys) {
       try {
         let jsonString = rawKeys.trim().replace(/^['"]|['"]$/g, '');
-        
-        // Robust Base64 detection (Base64 for '{' is 'ewog')
         if (!jsonString.startsWith('{') && (jsonString.startsWith('ewog') || !jsonString.includes(' '))) {
-          try {
-            console.log("Detecting Base64 encoded credentials, decoding...");
-            jsonString = Buffer.from(jsonString, 'base64').toString('utf8');
-          } catch (e) {
-            console.warn("Base64 decoding failed, using raw string.");
-          }
+          jsonString = Buffer.from(jsonString, 'base64').toString('utf8');
         }
-
         credentials = JSON.parse(jsonString);
+        if (credentials.private_key) {
+          credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+        }
       } catch (e: any) {
         console.error("GOOGLE AUTH JSON PARSE ERROR:", e.message);
       }
     }
 
-    // Fallback to local file
+    // 3. Fallback/Local File
     if (!credentials) {
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const filePath = path.join(process.cwd(), 'service-account.json');
-        if (fs.existsSync(filePath)) {
-          credentials = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        }
-      } catch (e) {
-        // Safe to ignore if running in production without file
+      const keyPath = path.join(process.cwd(), 'service-account.json');
+      if (fs.existsSync(keyPath)) {
+        credentials = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
       }
     }
 
-    if (!credentials || !credentials.private_key) {
-      console.error("GOOGLE AUTH ERROR: No valid credentials found.");
+    if (!credentials) {
+      console.error("GOOGLE AUTH ERROR: No credentials provided.");
       return null;
     }
 
-    const authClient = google.auth.fromJSON(credentials);
-    if (authClient && 'scopes' in authClient) {
-      (authClient as any).scopes = ["https://www.googleapis.com/auth/spreadsheets"];
+    // 4. EMULATE FILE IN PRODUCTION (Double protection)
+    // Writing to /tmp ensures the library uses its most robust file-path-based logic.
+    try {
+      const tmpDir = '/tmp';
+      if (fs.existsSync(tmpDir)) {
+        tempFilePath = path.join(tmpDir, `google-auth-${Date.now()}.json`);
+        fs.writeFileSync(tempFilePath, JSON.stringify(credentials));
+      }
+    } catch (e) {
+      // Possible in some local environments without /tmp
     }
 
-    sheets = google.sheets({ version: "v4", auth: authClient as any });
+    const auth = new google.auth.GoogleAuth({
+      keyFile: tempFilePath || undefined,
+      credentials: tempFilePath ? undefined : credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    sheets = google.sheets({ version: "v4", auth });
     return sheets;
+  } catch (e) {
+    console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
+    return null;
+  }
+}
     return sheets;
   } catch (e) {
     console.error("GOOGLE SHEETS FATAL AUTH ERROR:", e);
