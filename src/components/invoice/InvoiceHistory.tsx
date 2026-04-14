@@ -70,7 +70,7 @@ export default function InvoiceHistory({
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
           <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <FileText className="w-6 h-6 text-primary" />
-            Invoice History (Google Sheets)
+            Invoice History
           </h2>
           <Button
             variant="ghost"
@@ -90,7 +90,7 @@ export default function InvoiceHistory({
             </div>
           ) : invoices.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
-              No invoices saved on Google Sheets yet.
+              No invoices saved yet.
             </div>
           ) : (
             <div className="bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">

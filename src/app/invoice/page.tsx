@@ -36,7 +36,7 @@ export default function InvoicePage() {
       actions.setInvoiceNumber(nextNumber);
     } catch (error) {
       console.error("Error fetching next invoice number:", error);
-      toast.error("Error conectando con Google Sheets");
+      toast.error("Could not load invoice number from database");
     }
   }, [actions]);
 
@@ -64,7 +64,7 @@ export default function InvoicePage() {
     try {
       const result = await saveInvoice(data);
       if (!silent) {
-        toast.success(`Guardado en Google Sheets: ${result.sheetName}`);
+        toast.success(`Invoice saved! ✓`);
       }
       setIsLocked(true);
       return { success: true };
@@ -83,7 +83,7 @@ export default function InvoicePage() {
     // 1. Try to auto-save, but don't block PDF if it fails
     const saveResult = await handleSaveInvoice(true);
     if (!saveResult.success) {
-      toast.error("Note: Invoice couldn't be synced to Google Sheets, but generating PDF anyway.");
+      toast.error("Note: Invoice couldn't be saved, but generating PDF anyway.");
       console.warn("Auto-save failed:", saveResult.error);
     }
 
